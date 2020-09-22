@@ -53,14 +53,27 @@ def orbit(mean_anomaly, eccentricity, semi_major_axis, accuracy):
 # Plotting
 fig, ax = plt.subplots()
 
-dummy = np.arange(0, 9)
-print(dummy)
+n_planets = len(planets.index)
+
+history = []
+
+line_plots = []
+for i in range(n_planets):
+    history.append([[0], [0]])
+    line_plots.append(plt.plot(history[i], color='black', linewidth=0.5)[0])
+    print(line_plots[i])
+
+
+dummy = np.arange(0, n_planets)
 scatterplot = plt.scatter(x=dummy, y=dummy, s=planets['diameter']*0.001, c=planets['mean_temperature'])
+
+
 plt.colorbar().set_label('Mean temperature')
 plt.title('Solar System')
 
 ax.set_xlim(-6000, 6000)
 ax.set_ylim(-6000, 6000)
+
 
 def update(frame):
 
@@ -69,6 +82,11 @@ def update(frame):
     for index, planet in planets.iterrows():
         x, y = orbit(planet['orbital_velocity'] * frame, planet['orbital_eccentricity'], planet['semi_major_axis'], acc)
         offsets.append([x, y])
+
+        history[index][0].append(x)
+        history[index][1].append(y)
+
+        line_plots[index].set_data(history[index])
 
     scatterplot.set_offsets(offsets)
 
