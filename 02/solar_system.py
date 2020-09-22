@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-
 planets = pd.read_csv('planets.csv')
 print(planets.head())
-
 
 # define the accuracy
 acc = 0.001
@@ -53,30 +52,27 @@ def orbit(mean_anomaly, eccentricity, semi_major_axis, accuracy):
 
 # Plotting
 fig, ax = plt.subplots()
-xdata, ydata = [], []
-ln, = plt.plot([], [], 'ro')
 
+dummy = np.arange(0, 9)
+print(dummy)
+scatterplot = plt.scatter(x=dummy, y=dummy, s=planets['diameter']*0.001, c=planets['mean_temperature'])
+plt.colorbar().set_label('Mean temperature')
+plt.title('Solar System')
 
-def init():
-    plt.cla()
-    ax.set_xlim(-6000, 6000)
-    ax.set_ylim(-6000, 6000)
-    return ln,
-
+ax.set_xlim(-6000, 6000)
+ax.set_ylim(-6000, 6000)
 
 def update(frame):
-    xdata = []
-    ydata = []
+
+    offsets = []
 
     for index, planet in planets.iterrows():
-        x, y = orbit(planet['orbital_velocity']*frame, planet['orbital_eccentricity'], planet['semi_major_axis'], 0.0001)
-        xdata.append(x)
-        ydata.append(y)
+        x, y = orbit(planet['orbital_velocity'] * frame, planet['orbital_eccentricity'], planet['semi_major_axis'], acc)
+        offsets.append([x, y])
 
-    ln.set_data(xdata, ydata)
-    return ln,
+    scatterplot.set_offsets(offsets)
 
 
-ani = FuncAnimation(fig, update, frames=np.linspace(0, 2 * np.pi, 1024), init_func=init, blit=True, interval=40)
+ani = FuncAnimation(fig, update, frames=np.linspace(0, 2 * np.pi, 1024), interval=20, repeat=True)
 
 plt.show()
