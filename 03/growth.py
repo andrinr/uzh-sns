@@ -6,13 +6,6 @@ import matplotlib.pyplot as plt
 def logistic(X_n, alpha):
     return alpha * X_n * (1 - X_n)
 
-x_resolution = 2000
-
-# init and declare array of alpha values, ranging between 1 and 4
-# We omit [0,1] because all results are 0 anyways
-alphas = np.linspace(1, 4, x_resolution)
-
-
 
 def growth(alpha = 2.3, intital = 0.5, iterations = 300, cutoff = 100):
 
@@ -23,21 +16,25 @@ def growth(alpha = 2.3, intital = 0.5, iterations = 300, cutoff = 100):
         # caclculate new X, X_{n+1}
         X = logistic(X, alpha)
 
+        # only save values after the cutoff is exceeded
         if j >= cutoff:
             return_array[j-cutoff, :] = [alpha, X]
 
     return return_array
 
-
+x_resolution = 2000
+# init and declare array of alpha values, ranging between 1 and 4
+# We omit [0,1] because all results are 0 anyways
+alphas = np.linspace(1, 4, x_resolution)
 iterations = 200
 cutoff = 100
 points = np.zeros((x_resolution, iterations-cutoff,2))
 
 for i in range(x_resolution):
-    points[i,:,:] = growth(alphas[i], 0.5, iterations, cutoff)
+    points[i, :, :] = growth(alphas[i], 0.5, iterations, cutoff)
 
 
-# plot obtained values
+# plot obtained values, fractal behaviour
 fig, ax = plt.subplots()
 plt.scatter(points[:, :, 0].flatten(), points[:, :, 1].flatten(), 1, "#000", marker="^")
 
@@ -48,28 +45,33 @@ fig, axs = plt.subplots(2, 2)
 x = np.linspace(0, 1, 100)
 
 alphas = [2.75, 0.9, 3.2, 3.8]
+initials = [0.5,0.8,0.5,0.3]
 titles = [
-    'Regular behaviour, a = 2.75',
-    'Regular behaviour, a = 0.9',
+    'Intersection convergence, a = 2.75',
+    'Convergence to 0, a = 0.9',
     'Cyclical behaviour, a = 3.2',
     'Chaotic behaviour, a = 3.8'
 ]
 
+# Plot four subplots with different characteristic behaviours
 for index in range(4):
     axis = axs.flatten()[index]
     alpha = alphas[index]
     axis.set_title(titles[index])
 
+    # y data from parabola
     y_1 = x * alpha * (1 - x)
+    # y data from 45deg line
     y_2 = x
 
     axis.plot(x, y_1)
     axis.plot(x, y_2)
 
-    n = 50
-    growth_y = growth(alpha, 0.3, n, 0)[:, 1]
+    n = 30
+    # only interested in y values
+    growth_y = growth(alpha, initials[index], n, 0)[:, 1]
 
-    print(growth_y)
+    # init line plot data
     line_x = np.zeros(n*2)
     line_y = np.zeros(n*2)
 
@@ -77,15 +79,16 @@ for index in range(4):
     line_y[0] = 0
 
     for i in range(1,n):
+        # y = X_{n}
+        # x = X_{n-1}
         line_x[2*i] = growth_y[i-1]
         line_y[2*i] = growth_y[i]
+        # y = X_{n}
+        # x = X_{n}
         line_x[2*i+1] = growth_y[i]
         line_y[2*i+1] = growth_y[i]
 
     axis.plot(line_x[2:],line_y[2:])
-
-
-    # axis.scatter(data[1:-1, 1], data[2:, 1], c="red", marker="x")
 
 
 fig.tight_layout(pad=3.0)
