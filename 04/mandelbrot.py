@@ -22,25 +22,32 @@ pixels = np.zeros(shape)
 # Calculation
 def escape(x, y):
 
-    C = complex(x,y)
+    C = complex(x, y)
+    # initialize Z_0
     Z = C
     iterations = 0
 
+    # check if out of bounds or max number of iterations is reached
     while Z.real < 2 and Z.imag < 2 and iterations < max_iterations:
+        # Calculate Z_n+1 from Z_n
         Z = Z*Z + C
+        # Increment iterations
         iterations += 1
 
     return iterations
 
 
+# Normalize x-y-coordinates
 def normalize(x, y):
     return x/shape[0], y/shape[1]
 
 
+# transform to mandelbrot space
 def mandelbrot_space(x, y):
     return zoom*x+center[0], zoom*y+center[1]
 
 
+# iterate over pixels
 for x in range(shape[0]):
     for y in range(shape[1]):
         x_norm, y_norm = normalize(x, y)
