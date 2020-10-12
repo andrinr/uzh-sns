@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 # Parameters
-shape = (512, 512)
+shape = (1024, 1024)
 
 max_iterations = 100
 
