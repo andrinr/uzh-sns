@@ -4,7 +4,8 @@ from progress.bar import Bar
 import matplotlib.pyplot as plt
 
 
-# Commonly referenced:
+# Commonly referenced, but not used here:
+# Sebastian will ask Joachim about the difference of the two versions
 def leap_frog_step_legacy(tn, yn, h, df_dt):
 
     vel_half = yn[1] + 0.5 * h * df_dt(tn, yn[0])
@@ -16,7 +17,7 @@ def leap_frog_step_legacy(tn, yn, h, df_dt):
     return [pos, vel]
 
 
-# Introduced in the lecture:
+# Introduced in the lecture, is used here:
 def leap_frog_step(tn, yn, h, df_dt):
 
     pos_half = yn[0] + 0.5 * h * yn[1]
@@ -94,17 +95,24 @@ def df_dt_planets(t, positions, masses=m):
     return acceleration
 
 
+# Plotting
 step = 100
 fig1 = plt.figure()
 fig1, axs1 = plt.subplots(2, 2)
 
-print("Processing 1 year of the solar system:")
-timeline, planets = ode_solver(0, y_0, df_dt_planets, 0.01, 365*100, leap_frog_step)
+print("Processing 2 years of the solar system:")
+timeline, planets = ode_solver(0, y_0, df_dt_planets, 0.01, 365*200, leap_frog_step)
 
+# Plot inner solar system
+axs1[0][0].set_title("X : Y,  step=0.01days, t=2years")
+axs1[1][0].set_title("X : Z,  step=0.01days, t=2years")
 for i in range(5):
     axs1[0][0].plot(planets[::step, 0, i, 0], planets[::step, 0, i, 1])
     axs1[1][0].plot(planets[::step, 0, i, 0], planets[::step, 0, i, 2])
 
+plt.legend(names, loc=1)
+
+# plot x, y, z positions against time
 fig2, axs2 = plt.subplots(3, 1)
 for i in range(5):
     axs2[0].set_title("X positions")
@@ -114,34 +122,39 @@ for i in range(5):
     axs2[2].set_title("Z positions")
     axs2[2].plot(timeline[::step], planets[::step, 0, i, 2])
 
-print("Processing 100 years of the solar system with lower precision:")
-timeline, planets = ode_solver(0, y_0, df_dt_planets, 1, 365*100, leap_frog_step)
+plt.legend(names, loc=1)
 
+print("Processing 200 years of the solar system with lower precision:")
+timeline, planets = ode_solver(0, y_0, df_dt_planets, 1, 365*200, leap_frog_step)
+
+axs1[0][1].set_title("X : Y,  step=1day, t=200years")
+axs1[1][1].set_title("X : Z,  step=1day, t=200years")
+# Plot outer solar system
 for i in range(n_planets):
     axs1[0][1].plot(planets[::step, 0, i, 0], planets[::step, 0, i, 1])
     axs1[1][1].plot(planets[::step, 0, i, 0], planets[::step, 0, i, 2])
 
-plt.legend(names, loc=1)
 
 fig1 = plt.figure()
+
+# Plot planets in 3D
 ax = fig1.add_subplot(111, projection='3d')
 for i in range(n_planets):
     ax.plot(planets[::step, 0, i, 0], planets[::step, 0, i, 1], planets[::step, 0, i, 2])
 
 plt.legend(names, loc=1)
 
-# Diagnosis plots of individual coordinates, positions and velocities
 fig3, axs3 = plt.subplots(3, 1)
 # Add spacing between subplots
 
 # Outer solar system
-for i in range(4):
+for i in range(5, 9):
     axs3[0].set_title("X positions")
-    axs3[0].plot(timeline[::step], planets[::step, 0, i+5, 0])
+    axs3[0].plot(timeline[::step], planets[::step, 0, i, 0])
     axs3[1].set_title("Y positions")
-    axs3[1].plot(timeline[::step], planets[::step, 0, i+5, 1])
+    axs3[1].plot(timeline[::step], planets[::step, 0, i, 1])
     axs3[2].set_title("Z positions")
-    axs3[2].plot(timeline[::step], planets[::step, 0, i+5, 2])
+    axs3[2].plot(timeline[::step], planets[::step, 0, i, 2])
 
-plt.legend(names, loc=1)
+plt.legend(names[5:9], loc=1)
 plt.show()
