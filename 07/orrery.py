@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 
 # Commonly referenced, but not used here:
 # Sebastian will ask Joachim about the difference of the two versions
+
+# This version is used for analysis, because position and velocity are known at one point
 def leap_frog_step_legacy(tn, yn, h, df_dt):
 
     vel_half = yn[1] + 0.5 * h * df_dt(tn, yn[0])
