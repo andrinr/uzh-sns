@@ -61,7 +61,6 @@ def bicubic(grid, coord):
 
     X = np.matrix([[1, u, u*u, u*u*u]])
     Y = np.matrix([[1], [v], [v*v], [v*v*v]])
-    #print(Y*X)
 
     return X * M * A * M.T * Y
 
@@ -80,7 +79,15 @@ def deriv(grid, coord, axis):
         return  grid[x, y_p] - grid[x, y_n]
 
 def cross_deriv(grid, coord):
-    return 0
+    x = coord[0]
+    y = coord[1]
+
+    y_p = min(y+1, np.shape(grid)[1]-1)
+    y_n = max(y-1, 0)
+
+    p1 = deriv(grid, [x,y_n], 0)
+    p2 = deriv(grid, [x,y_p], 0)
+    return p2-p1
 
 
 # Run this script to see the testing plots
