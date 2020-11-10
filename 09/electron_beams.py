@@ -41,7 +41,7 @@ ax_top = fig.add_subplot(gs[0,:])
 
 for i in range(N2):
     for j in range(N2):
-        ip[i,j] = bilinear(P,1/N2*i,1/N2*j)
+        ip[i,j] = bilinear(P,[1/N2*i,1/N2*j])
 
 ax_top.imshow(ip,cmap="plasma")
 
