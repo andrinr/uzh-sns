@@ -15,7 +15,7 @@ gs = fig.add_gridspec(2, 3)
 ax_main = fig.add_subplot(gs[:,:])
 
 # Calculate potential field
-N = 20
+N = 100
 omega = 2 / ( 1 + np.pi / N)
 boundary = np.full((N,N), omega)
 
@@ -38,7 +38,7 @@ eliptic.plot(ax_main)
 # Electrons
 electrons = Electrons(100, P, ode_solver, runge_kutta_fourth_step, bicubic)
 electrons.solve(1000, 0.000001)
-electrons.plot(ax_main)
+electrons.plot(ax_main, N)
 
 
 

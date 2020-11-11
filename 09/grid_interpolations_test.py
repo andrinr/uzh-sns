@@ -2,7 +2,8 @@ from grid_interpolations import bicubic
 from grid_interpolations import bilinear
 import numpy as np
 import matplotlib.pyplot as plt
-# Run this script to see the testing plots
+
+# Visual test of bicubic and bilinear interpolation implementations
 
 fig = plt.figure(constrained_layout=True)
 gs = fig.add_gridspec(1, 3)

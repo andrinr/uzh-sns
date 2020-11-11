@@ -1,6 +1,6 @@
 import numpy as np
 
-# General ODE solver
+# General ODE solver, not used in this project
 def ode_solver(t0, y0, df_dt, h, n_steps, solver_step_func):
     t = np.zeros(n_steps)
     y = np.zeros((n_steps,) + np.shape(y0))
