@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 # Local Dependencies
 from Eliptic import Eliptic
-from Particle import Particle
+from Electrons import Electron
 from grid_interpolations import bilinear
 
 fig = plt.figure(constrained_layout=True)
@@ -45,9 +45,6 @@ for i in range(N2):
 
 ax_top.imshow(ip,cmap="plasma")
 
-particles = []
-for i in range(1000):
-    particles.append(Particle(0,0))
 
 
 plt.show()

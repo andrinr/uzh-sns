@@ -117,8 +117,8 @@ for i in range(N2):
     for j in range(N2):
         cubic[i,j] = bicubic(noise,[1/N2*i,1/N2*j])
 
-raw_ax.imshow(noise,cmap="plasma")
-linear_ax.imshow(linear,cmap="plasma")
-cubic_ax.imshow(cubic,cmap="plasma")
+raw_ax.imshow(noise,cmap="Greys")
+linear_ax.imshow(linear,cmap="Greys")
+cubic_ax.imshow(cubic,cmap="Greys")
 
 plt.show()
