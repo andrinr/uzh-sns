@@ -38,31 +38,31 @@ def runge_kutta(f_prime, f_init, g_prime, g_init, h, n):
     return f_history, g_history
 
 
-# General Runge Kutta 4th order implementation for two ODE's with dependence
-def runge_kutta_fourth(f_prime, f_init, g_prime, g_init, h, n):
-    f_history = np.zeros(n)
-    g_history = np.zeros(n)
+    # General Runge Kutta 4th order implementation for two ODE's with dependence
+    def runge_kutta_fourth(f_prime, f_init, g_prime, g_init, h, n):
+        f_history = np.zeros(n)
+        g_history = np.zeros(n)
 
-    f_history[0] = f_init
-    g_history[0] = g_init
+        f_history[0] = f_init
+        g_history[0] = g_init
 
-    for i in range(1, n):
-        f_k1 = h * f_prime(f_history[i - 1], g_history[i - 1])
-        g_k1 = h * g_prime(g_history[i - 1], f_history[i - 1])
+        for i in range(1, n):
+            f_k1 = h * f_prime(f_history[i - 1], g_history[i - 1])
+            g_k1 = h * g_prime(g_history[i - 1], f_history[i - 1])
 
-        f_k2 = h * f_prime(f_history[i - 1] + f_k1 / 2, g_history[i - 1] + g_k1 / 2)
-        g_k2 = h * g_prime(g_history[i - 1] + g_k1 / 2, f_history[i - 1] + f_k1 / 2)
+            f_k2 = h * f_prime(f_history[i - 1] + f_k1 / 2, g_history[i - 1] + g_k1 / 2)
+            g_k2 = h * g_prime(g_history[i - 1] + g_k1 / 2, f_history[i - 1] + f_k1 / 2)
 
-        f_k3 = h * f_prime(f_history[i - 1] + f_k2 / 2, g_history[i - 1] + g_k2 / 2)
-        g_k3 = h * g_prime(g_history[i - 1] + g_k2 / 2, f_history[i - 1] + f_k2 / 2)
+            f_k3 = h * f_prime(f_history[i - 1] + f_k2 / 2, g_history[i - 1] + g_k2 / 2)
+            g_k3 = h * g_prime(g_history[i - 1] + g_k2 / 2, f_history[i - 1] + f_k2 / 2)
 
-        f_k4 = h * f_prime(f_history[i - 1] + f_k3, g_history[i - 1] + g_k3)
-        g_k4 = h * g_prime(g_history[i - 1] + g_k3, f_history[i - 1] + f_k3)
+            f_k4 = h * f_prime(f_history[i - 1] + f_k3, g_history[i - 1] + g_k3)
+            g_k4 = h * g_prime(g_history[i - 1] + g_k3, f_history[i - 1] + f_k3)
 
-        f_history[i] = f_history[i - 1] + f_k1 / 6 + f_k2 / 3 + f_k3 / 3 + f_k4 / 6
-        g_history[i] = g_history[i - 1] + g_k1 / 6 + g_k2 / 3 + g_k3 / 3 + g_k4 / 6
+            f_history[i] = f_history[i - 1] + f_k1 / 6 + f_k2 / 3 + f_k3 / 3 + f_k4 / 6
+            g_history[i] = g_history[i - 1] + g_k1 / 6 + g_k2 / 3 + g_k3 / 3 + g_k4 / 6
 
-    return f_history, g_history
+        return f_history, g_history
 
 
 # Define Differential Equations with fixed given parameters

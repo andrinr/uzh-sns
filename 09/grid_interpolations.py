@@ -23,7 +23,20 @@ def bilinear(grid, coord):
 
 def bicubic(grid, coord):
 
-    x, y, u, v = get_coords(np.shape(grid), coord)
+    shape = np.shape(grid)
+    # clamp at boundary
+
+    x, y, u, v = get_coords(shape, coord)
+
+    if x == shape[0]-1:
+        x = shape[0]-2
+        u = 0.999
+    
+    if y == shape[1]-1:
+        y = shape[1]-2
+        v = 0.999
+
+    #print(shape, x, y, u, v)
 
     g00 = grid[x,y]
     g01 = grid[x,y+1]
@@ -62,15 +75,19 @@ def bicubic(grid, coord):
     X = np.matrix([[1, u, u*u, u*u*u]])
     Y = np.matrix([[1], [v], [v*v], [v*v*v]])
 
-    return X * M * A * M.T * Y
+    
+    return (X * M * A * M.T * Y)[0,0]
 
 def deriv(grid, coord, axis):
+    shape = np.shape(grid)
+    # clamp at boundary
     x = coord[0]
     y = coord[1]
-    x_p = min(x+1, np.shape(grid)[0]-1)
+    # clamp at bundary
+    x_p = min(x+1, shape[0]-1)
     x_n = max(x-1, 0)
-
-    y_p = min(y+1, np.shape(grid)[1]-1)
+    # clamp at bundary
+    y_p = min(y+1, shape[1]-1)
     y_n = max(y-1, 0)
 
     if axis == 0:
@@ -88,37 +105,3 @@ def cross_deriv(grid, coord):
     p1 = deriv(grid, [x,y_n], 0)
     p2 = deriv(grid, [x,y_p], 0)
     return p2-p1
-
-
-# Run this script to see the testing plots
-
-fig = plt.figure(constrained_layout=True)
-gs = fig.add_gridspec(1, 3)
-
-# Line plots
-raw_ax = fig.add_subplot(gs[:,0])
-linear_ax = fig.add_subplot(gs[:,1])
-cubic_ax = fig.add_subplot(gs[:,2])
-
-N1 = 10
-N2 = 100
-
-noise = np.random.rand(N1,N1)
-
-linear = np.zeros((N2,N2))
-
-cubic = np.zeros((N2,N2))
-
-for i in range(N2):
-    for j in range(N2):
-        linear[i,j] = bilinear(noise,[1/N2*i,1/N2*j])
-
-for i in range(N2):
-    for j in range(N2):
-        cubic[i,j] = bicubic(noise,[1/N2*i,1/N2*j])
-
-raw_ax.imshow(noise,cmap="Greys")
-linear_ax.imshow(linear,cmap="Greys")
-cubic_ax.imshow(cubic,cmap="Greys")
-
-plt.show()

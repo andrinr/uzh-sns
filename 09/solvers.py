@@ -14,7 +14,7 @@ def ode_solver(t0, y0, df_dt, h, n_steps, solver_step_func):
     return t, y
 
 
-# Introduced in the lecture, is used here:
+# Leap Frog Step
 def leap_frog_step(tn, yn, h, df_dt):
 
     pos_half = yn[0] + 0.5 * h * yn[1]

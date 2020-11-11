@@ -3,14 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 # Local Dependencies
 from Eliptic import Eliptic
-from Electrons import Electron
-from grid_interpolations import bilinear
+from Electrons import Electrons
+from grid_interpolations import bicubic
+from solvers import ode_solver
+from solvers import runge_kutta_fourth_step
 
 fig = plt.figure(constrained_layout=True)
 gs = fig.add_gridspec(2, 3)
 
 # Line plots
-ax_main = fig.add_subplot(gs[1,:])
+ax_main = fig.add_subplot(gs[:,:])
 
 # Calculate potential field
 N = 20
@@ -33,17 +35,10 @@ eliptic = Eliptic(N, P, boundary)
 eliptic.solve(0.01)
 eliptic.plot(ax_main)
 
-# Test bilinear interpolation
-N2 = 100
-ip = np.zeros((N2,N2))
-
-ax_top = fig.add_subplot(gs[0,:])
-
-for i in range(N2):
-    for j in range(N2):
-        ip[i,j] = bilinear(P,[1/N2*i,1/N2*j])
-
-ax_top.imshow(ip,cmap="plasma")
+# Electrons
+electrons = Electrons(100, P, ode_solver, runge_kutta_fourth_step, bicubic)
+electrons.solve(1000, 0.000001)
+electrons.plot(ax_main)
 
 
 
