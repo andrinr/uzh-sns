@@ -30,6 +30,10 @@ for i in range(N2):
     for j in range(N2):
         cubic[i,j] = bicubic(noise,[1/N2*i,1/N2*j])
 
+# QUESTION:
+# The bicubic interpolation yields results, of which some are greater than 1 or less than 0.
+# Is this expected behaviour? If not what did I do wrong?
+
 raw_ax.imshow(noise,cmap="Greys")
 linear_ax.imshow(linear,cmap="Greys")
 cubic_ax.imshow(cubic,cmap="Greys")

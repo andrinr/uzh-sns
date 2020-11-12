@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # General ODE solver, not used in this project
 def ode_solver(t0, y0, df_dt, h, n_steps, solver_step_func):
     t = np.zeros(n_steps)
@@ -26,21 +27,19 @@ def leap_frog_step(tn, yn, h, df_dt):
     return [pos, vel]
 
 
-# General Runge Kutta 4th order implementation for two ODE's with dependence
+# Runge kutta fourth order step
 def runge_kutta_fourth_step(tn, yn, h, df_dt):
 
     h_d2 = 0.5 * h
 
     k1 = h * df_dt(tn, yn[0])
-
     k2 = h * df_dt(tn + h_d2, yn[0] + h_d2*k1)
-
     k3 = h * df_dt(tn + h_d2, yn[0] + h_d2*k2)
-
     k4 = h * df_dt(tn + h, yn[0] + h*k3)
 
-    vel = 1/6*(k1 + 2*k2 + 2*k3 + k4)
+    acceleration = 1/6*(k1 + 2*k2 + 2*k3 + k4)
 
+    vel = yn[1] + acceleration
     pos = yn[0] + vel
 
     return [pos, vel]
