@@ -23,7 +23,6 @@ class Eliptic:
         self.checkerboard[::2,::2] = True   
         self.checkerboard[1::2,1::2] = True
 
-    
     # Solver step
     def step(self, iteration):
         # Apply kernel, multiply by boundary and checkerboard
@@ -35,14 +34,15 @@ class Eliptic:
         self.P[~self.checkerboard] += change_i_checkerboard
 
         # Get maximum error over domain
-        current_error = max(np.abs(np.max(change_checkerboard)), np.abs(np.max(change_i_checkerboard)))
+        current_error = max(np.max(np.abs(change_checkerboard)), np.max(np.abs(change_i_checkerboard)))
+
+        print(current_error)
 
         # Store error and time
-        self.error.append(np.log(current_error))
+        self.error.append(current_error)
         self.time.append(iteration)
 
         return current_error
-
 
     def solve(self, max_error, max_steps=1000):
         i = 0
@@ -51,6 +51,7 @@ class Eliptic:
             error = self.step(i)
 
             if error < max_error or i > max_steps:
+                print(error, i)
                 return
 
     def plot(self, axis):

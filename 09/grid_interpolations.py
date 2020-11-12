@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # Get int x,y and fractions as u,v 
 def get_coords(shape, coord):
     # We are fetchting the lower left coordinate
@@ -28,6 +29,7 @@ def bilinear(grid, coord):
 
     return grid[x,y] * (1-u) * (1-v) + grid[x+1,y] * u * (1-v) + grid[x,y+1] * (1-u) *  v + grid[x+1,y+1] * u * v
 
+
 # Bicubic integration with boundary conditions
 def bicubic(grid, coord):
 
@@ -36,8 +38,8 @@ def bicubic(grid, coord):
 
     x, y, u, v = get_coords(shape, coord)
 
-    # Clamp at boundary, asume grid is continous on borders
-    # Meaning a derivate of 0
+    # Clamp at boundary, assume grid is continuous on borders
+    # Meaning a derivative of 0
     if x == shape[0]-1:
         x = shape[0]-2
         u = 0.999
@@ -92,7 +94,8 @@ def bicubic(grid, coord):
     # Matrix multiplication and reading fina value
     return (X * M * A * M.T * Y)[0,0]
 
-# Simple numerically approximated derivate
+
+# Simple numerically approximated derivative
 def deriv(grid, coord, axis):
     shape = np.shape(grid)
     # clamp at boundary
@@ -110,7 +113,8 @@ def deriv(grid, coord, axis):
     else:
         return  grid[x, y_p] - grid[x, y_n]
 
-# Simple nummerically approximated cross derivate
+
+# Simple numerically approximated cross derivative
 def cross_deriv(grid, coord):
     x = coord[0]
     y = coord[1]
