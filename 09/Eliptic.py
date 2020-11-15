@@ -36,8 +36,6 @@ class Eliptic:
         # Get maximum error over domain
         current_error = max(np.max(np.abs(change_checkerboard)), np.max(np.abs(change_i_checkerboard)))
 
-        print(current_error)
-
         # Store error and time
         self.error.append(current_error)
         self.time.append(iteration)
@@ -51,7 +49,7 @@ class Eliptic:
             error = self.step(i)
 
             if error < max_error or i > max_steps:
-                print(error, i)
+                print('Eliptic solver finished with max error ', error, ' after ', i, ' iterations.')
                 return
 
     def plot(self, axis):

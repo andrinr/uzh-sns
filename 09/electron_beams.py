@@ -33,7 +33,7 @@ boundary[int(0.5*N), int(0.25*N):int(0.75*N)] = 0
 P = np.zeros((N, N))
 
 # Add wire with 1000V potential
-P[int(0.5*N), int(0.25*N):int(0.75*N)] = 100
+P[int(0.5*N), int(0.25*N):int(0.75*N)] = 1000
 
 eliptic = Eliptic(N, P, boundary)
 eliptic.solve(0.01)
@@ -41,8 +41,8 @@ eliptic.plot(ax_main)
 
 # Electrons
 # Using bilinear over bicubic interpolation for greatly improved runtime, around 10x faster
-electrons = Electrons(1, P, [0.01, 0.01], runge_kutta_fourth_step, bilinear)
-electrons.solve(500, 10**-9)
+electrons = Electrons(100, P, [0.01, 0.01], runge_kutta_fourth_step, bilinear)
+electrons.solve(500, 10**-20)
 electrons.plot(ax_main, N)
 
 plt.show()

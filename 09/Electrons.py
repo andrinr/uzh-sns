@@ -50,19 +50,22 @@ class Electron:
     def __init__(self, step_func, interpolation, grid, size):
         # Generate random angle
         angle = -np.pi/2 + random.random() * np.pi
-        print(angle)
-        init_energy = 10 ** 6
+        # TODO: Initial velocity is not working, i.e. way to big compared to other accelerations
+        init_energy = 0#10 ** 6
         # Generate x,y velocity from angle
         vel = np.array([np.cos(angle) * init_energy, np.sin(angle) * init_energy])
-        print(vel)
+
+        # Debug initial velocity
+        #print('init velocity: ', vel)
+
         # Random position, according to task description
         pos = np.array([0, random.random() * 0.3 + 0.6])
 
         # Init y, add y_0
         self.y = []
-        self.y.append([pos, vel])
+        self.y.append(np.array([pos, vel]))
 
-        print(self.y)
+        #print(self.y)
 
         # init t, add t_0
         self.t = []
@@ -75,7 +78,7 @@ class Electron:
         self.grid = grid
         self.size = size
 
-        self.delta = [1 / (np.shape(grid)[0] - 1), 1 / (np.shape(grid)[1] - 1)]
+        self.delta = np.array([1 / (np.shape(grid)[0]), 1 / (np.shape(grid)[1])])
 
     def df_dt(self, tn, pos):
         # Decreased delta yields more accurate derivative of grid position
@@ -97,12 +100,13 @@ class Electron:
         df_dx = 1. / (2 * s_x) * (self.interpolation(self.grid, [x_p, y]) - self.interpolation(self.grid, [x_n, y]))
         df_dy = 1. / (2 * s_y) * (self.interpolation(self.grid, [x, y_p]) - self.interpolation(self.grid, [x, y_n]))
 
+        # TODO: Not sure about this, trying to adjust for scale since we obtain m/s^2 but our domain is 0.01m
         # Adjust for scaling
         df_dx /= self.size[0]
         df_dy /= self.size[1]
 
-        print("acc", df_dy, df_dx)
-        return np.array([-df_dx * e_mc, -df_dy * e_mc])
+        acc = np.array([df_dx * e_mc, df_dy * e_mc])
+        return acc
 
     # Simple ODE solver with special break condition
     def solve(self, max_iterations, step_size):
@@ -117,7 +121,8 @@ class Electron:
 
     def plot(self, axis, scale):
         self.y = np.array(self.y)
-        print(self.y[:, :, 0])
-        print(self.y[:, :, 1])
-        #axis.plot(self.y[:, 0, 0] * scale, self.y[:, 0, 1] * scale)
+        #Debugging:
+        #print('positions:', self.y[:, 0, :])
+        #print('velocities:', self.y[:, 1, :])
+
         axis.scatter(self.y[:, 0, 0] * scale, self.y[:, 0, 1] * scale, s=1)

@@ -20,6 +20,16 @@ def get_coords(shape, coord):
     x = int(x)
     y = int(y)
 
+    # Clamp at boundary, assume grid is continuous on borders
+    # Meaning a derivative of 0
+    if x == shape[0] - 1:
+        x = shape[0] - 2
+        u = 0.999
+
+    if y == shape[1] - 1:
+        y = shape[1] - 2
+        v = 0.999
+
     return x, y, u, v
 
 
@@ -39,15 +49,6 @@ def bicubic(grid, coord):
 
     x, y, u, v = get_coords(shape, coord)
 
-    # Clamp at boundary, assume grid is continuous on borders
-    # Meaning a derivative of 0
-    if x == shape[0]-1:
-        x = shape[0]-2
-        u = 0.999
-    
-    if y == shape[1]-1:
-        y = shape[1]-2
-        v = 0.999
 
     # grid values
     g00 = grid[x, y]
