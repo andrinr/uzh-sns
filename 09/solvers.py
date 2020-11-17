@@ -40,6 +40,6 @@ def runge_kutta_fourth_step(tn, yn, h, df_dt):
     acceleration = 1/6*(k1 + 2*k2 + 2*k3 + k4)
 
     vel = yn[1] + acceleration
-    pos = yn[0] + vel
+    pos = yn[0] + h*vel
 
     return [pos, vel]

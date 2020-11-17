@@ -51,7 +51,7 @@ class Electron:
         # Generate random angle
         angle = -np.pi/2 + random.random() * np.pi
         # TODO: Initial velocity is not working, i.e. way to big compared to other accelerations
-        init_energy = 0#10 ** 6
+        init_energy = 10 ** 6
         # Generate x,y velocity from angle
         vel = np.array([np.cos(angle) * init_energy, np.sin(angle) * init_energy])
 
@@ -125,4 +125,4 @@ class Electron:
         #print('positions:', self.y[:, 0, :])
         #print('velocities:', self.y[:, 1, :])
 
-        axis.scatter(self.y[:, 0, 0] * scale, self.y[:, 0, 1] * scale, s=1)
+        axis.plot(self.y[:, 0, 0] * scale, self.y[:, 0, 1] * scale)

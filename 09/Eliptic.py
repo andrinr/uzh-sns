@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import ndimage
+from progress.bar import Bar
 import matplotlib.pyplot as plt
 
 class Eliptic:
@@ -43,12 +44,16 @@ class Eliptic:
         return current_error
 
     def solve(self, max_error, max_steps=1000):
+        bar = Bar(max=max_steps)
         i = 0
         while True:
             i += 1
             error = self.step(i)
 
+            bar.next()
+
             if error < max_error or i > max_steps:
+                bar.finish()
                 print('Eliptic solver finished with max error ', error, ' after ', i, ' iterations.')
                 return
 
