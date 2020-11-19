@@ -23,22 +23,22 @@ class Electrons:
         self.count = count
 
         self.electrons = []
-
+        self.detector = []
         for i in range(count):
             self.electrons.append(Electron(step_func, interpolation, grid, size))
 
     def solve(self, max_iterations, step_size):
         bar = CustomBar(max=self.count)
+
         for i in range(self.count):
-            self.electrons[i].solve(max_iterations, step_size, )
+            self.electrons[i].solve(max_iterations, step_size)
             bar.next()
 
         bar.finish()
 
-    def plot(self, axis, scale):
+    def plot(self, axis, axis_top_right, axis_bottom_right, scale):
         for i in range(self.count):
-            self.electrons[i].plot(axis, scale)
-
+            self.electrons[i].plot(axis, axis_top_right, scale)
 
 # constant
 e_mc = 1.76 * 10 ** 11
@@ -48,15 +48,18 @@ e_mc = 1.76 * 10 ** 11
 class Electron:
 
     def __init__(self, step_func, interpolation, grid, size):
+        self.step_func = step_func
+        self.interpolation = interpolation
+        self.grid = grid
+        self.size = size
+        self.hit_detector = False
+
         # Generate random angle
         angle = -np.pi/2 + random.random() * np.pi
-        # TODO: Initial velocity is not working, i.e. way to big compared to other accelerations
         init_energy = 10 ** 6
         # Generate x,y velocity from angle
         vel = np.array([np.cos(angle) * init_energy, np.sin(angle) * init_energy])
-
-        # Debug initial velocity
-        #print('init velocity: ', vel)
+        vel /= self.size
 
         # Random position, according to task description
         pos = np.array([0, random.random() * 0.3 + 0.6])
@@ -65,18 +68,9 @@ class Electron:
         self.y = []
         self.y.append(np.array([pos, vel]))
 
-        #print(self.y)
-
         # init t, add t_0
         self.t = []
         self.t.append(0)
-
-        # print(self.y)
-
-        self.step_func = step_func
-        self.interpolation = interpolation
-        self.grid = grid
-        self.size = size
 
         self.delta = np.array([1 / (np.shape(grid)[0]), 1 / (np.shape(grid)[1])])
 
@@ -100,7 +94,6 @@ class Electron:
         df_dx = 1. / (2 * s_x) * (self.interpolation(self.grid, [x_p, y]) - self.interpolation(self.grid, [x_n, y]))
         df_dy = 1. / (2 * s_y) * (self.interpolation(self.grid, [x, y_p]) - self.interpolation(self.grid, [x, y_n]))
 
-        # TODO: Not sure about this, trying to adjust for scale since we obtain m/s^2 but our domain is 0.01m
         # Adjust for scaling
         df_dx /= self.size[0]
         df_dy /= self.size[1]
@@ -115,14 +108,20 @@ class Electron:
             self.y.append(self.step_func(self.t[n], self.y[n], step_size, self.df_dt))
             self.t.append(self.t[n] + step_size)
 
+            if self.y[n + 1][0][0] > 1 and 0.1 < self.y[n + 1][0][1] < 0.4:
+                self.hit_detector = True
+
             # Break loop when electron exits grid space
             if self.y[n + 1][0][0] < 0 or self.y[n + 1][0][0] > 1 or self.y[n + 1][0][1] < 0 or self.y[n + 1][0][1] > 1:
                 break
 
-    def plot(self, axis, scale):
-        self.y = np.array(self.y)
-        #Debugging:
-        #print('positions:', self.y[:, 0, :])
-        #print('velocities:', self.y[:, 1, :])
+        return self.y
 
-        axis.plot(self.y[:, 0, 0] * scale, self.y[:, 0, 1] * scale)
+    def plot(self, axis_main, ax_top_right, scale):
+        self.y = np.array(self.y)
+
+        axis_main.plot(self.y[:, 0, 0] * scale, self.y[:, 0, 1] * scale)
+
+        if self.hit_detector:
+            ax_top_right.scatter(self.y[-1, 0, 1], self.t[-1])
+

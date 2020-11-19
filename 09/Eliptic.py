@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from progress.bar import Bar
-import matplotlib.pyplot as plt
+
 
 class Eliptic:
     
@@ -19,7 +19,7 @@ class Eliptic:
         self.error = []
         self.time = []
 
-         # Create checkerboard boolean Map
+        # Create checkerboard boolean Map
         self.checkerboard = np.full((N,N),False)
         self.checkerboard[::2,::2] = True   
         self.checkerboard[1::2,1::2] = True
@@ -58,4 +58,6 @@ class Eliptic:
                 return
 
     def plot(self, axis):
-        axis.imshow(self.P, cmap="plasma")
+        #axis.set_xlim(0, 1)
+        #axis.set_ylim(0, 1)
+        axis.imshow(self.P.T, cmap="viridis")
