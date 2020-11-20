@@ -9,6 +9,7 @@ from grid_interpolations import bicubic
 from solvers import ode_solver
 from solvers import runge_kutta_fourth_step
 from solvers import leap_frog_step
+from matplotlib.animation import FuncAnimation
 
 fig = plt.figure(constrained_layout=True)
 gs = fig.add_gridspec(3, 2)
@@ -19,7 +20,7 @@ ax_top_right = fig.add_subplot(gs[0, -1])
 ax_bottom_right = fig.add_subplot(gs[1, -1])
 
 # Calculate potential field
-N = 150
+N = 100
 ax_main.set_ylim(0, N)
 ax_main.set_xlim(0, N)
 omega = 2 / (1 + np.pi / N)
@@ -130,36 +131,44 @@ P = np.zeros((N, N))
 # Design 4
 
 center_x = int(0.1*N)
-center_y = int(0.75*N)
+start_y = int(0.99 * N)
 slope = 1
 length = 0.2*N
-x = (np.linspace(0, 1, 20)*length).astype(int)
+x = (np.linspace(0, 1, int(length))*length).astype(int)
 
 print(x)
 
-y_1 = (center_y + slope*x).astype(int)
-y_2 = (center_y - slope*x).astype(int)
+#y_1 = (start_y + slope * x).astype(int)
+y_2 = (start_y - slope * x).astype(int)
 
-print(y_1)
+#print(y_1)
 print(y_2)
-boundary[x+center_x, y_1] = 0
-P[x+center_x, y_1] = 1000
+#boundary[x+center_x, y_1] = 0
+#P[x+center_x, y_1] = 1000
 boundary[x+center_x, y_2] = 0
 P[x+center_x, y_2] = 1000
 
-boundary[x[-1]+center_x, y_1[-1]] = 0
-P[x[-1]+center_x, y_1[-1]] = -1000
-boundary[x[-1]+center_x, y_2[1]] = 0
-P[x[-1]+center_x, y_2[-1]] = 1000
+#boundary[x+center_x+1, y_1] = 0
+#P[x+center_x+1, y_1] = 0
+boundary[x+center_x+1, y_2] = 0
+P[x+center_x+1, y_2] = 0
+
 
 eliptic = Eliptic(N, P, boundary)
 eliptic.solve(10**-28, 10**3)
 eliptic.plot(ax_main)
 
+frames = 1000
+
 # Electrons
 # Using bilinear over bicubic interpolation for greatly improved runtime, around 10x faster
-electrons = Electrons(100, P, [0.01, 0.01], runge_kutta_fourth_step, bilinear)
-electrons.solve(1000, 10**-10*0.5)
-electrons.plot(ax_main, ax_top_right, ax_bottom_right, N)
+electrons = Electrons(100, P, [0.01, 0.01], runge_kutta_fourth_step, bilinear, 10**-10*0.5, frames)
+#electrons.solve(1000, 10**-10*0.5)
+#electrons.plot(ax_main, ax_top_right, ax_bottom_right, N)
+
+electrons.init_plot(ax_main, ax_top_right, N)
+
+ani = FuncAnimation(fig, electrons.step, frames=range(frames), interval=1, repeat=False)
+
 
 plt.show()

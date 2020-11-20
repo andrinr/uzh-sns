@@ -24,7 +24,7 @@ def leap_frog_step(tn, yn, h, df_dt):
 
     pos = pos_half + 0.5 * h * vel
 
-    return [pos, vel]
+    return np.array([pos, vel])
 
 
 # Runge kutta fourth order step
@@ -42,4 +42,4 @@ def runge_kutta_fourth_step(tn, yn, h, df_dt):
     vel = yn[1] + acceleration
     pos = yn[0] + h*vel
 
-    return [pos, vel]
+    return np.array([pos, vel])

@@ -19,13 +19,13 @@ class Electrons:
     # size: array of size two defining the grid dimensions in meters
     # step_func: the step function the internal ODE solver will use
     # interpolation method used
-    def __init__(self, count, grid, size, step_func, interpolation):
+    def __init__(self, count, grid, size, step_func, interpolation, h, max_iterations):
         self.count = count
 
         self.electrons = []
         self.detector = []
         for i in range(count):
-            self.electrons.append(Electron(step_func, interpolation, grid, size))
+            self.electrons.append(Electron(step_func, interpolation, grid, size, h, max_iterations))
 
     def solve(self, max_iterations, step_size):
         bar = CustomBar(max=self.count)
@@ -36,9 +36,24 @@ class Electrons:
 
         bar.finish()
 
+    def step(self, iteration):
+        for i in range(self.count):
+            self.electrons[i].step(iteration)
+
+    def init_plot(self, axis_main, axis_detector, scale):
+        axis_main.set_xlim(0, scale)
+        axis_main.set_ylim(0, scale)
+
+        axis_detector.set_xlim(0.1, 0.4)
+        axis_detector.set_ylim(10**-4, 10**-10)
+
+        for i in range(self.count):
+            self.electrons[i].init_plot(axis_main, axis_detector, scale)
+
     def plot(self, axis, axis_top_right, axis_bottom_right, scale):
         for i in range(self.count):
             self.electrons[i].plot(axis, axis_top_right, scale)
+
 
 # constant
 e_mc = 1.76 * 10 ** 11
@@ -47,12 +62,15 @@ e_mc = 1.76 * 10 ** 11
 # Electron instance
 class Electron:
 
-    def __init__(self, step_func, interpolation, grid, size):
+    def __init__(self, step_func, interpolation, grid, size, h, max_iterations):
         self.step_func = step_func
         self.interpolation = interpolation
         self.grid = grid
         self.size = size
+        self.h = h
+
         self.hit_detector = False
+        self.out_of_domain = False
 
         # Generate random angle
         angle = -np.pi/2 + random.random() * np.pi
@@ -65,12 +83,12 @@ class Electron:
         pos = np.array([0, random.random() * 0.3 + 0.6])
 
         # Init y, add y_0
-        self.y = []
-        self.y.append(np.array([pos, vel]))
+        self.y = np.zeros((max_iterations, 2, 2))
+        self.y[0] = np.array([pos, vel])
 
         # init t, add t_0
-        self.t = []
-        self.t.append(0)
+        self.t = np.zeros(max_iterations)
+        self.t[0] = 0
 
         self.delta = np.array([1 / (np.shape(grid)[0]), 1 / (np.shape(grid)[1])])
 
@@ -108,14 +126,42 @@ class Electron:
             self.y.append(self.step_func(self.t[n], self.y[n], step_size, self.df_dt))
             self.t.append(self.t[n] + step_size)
 
-            if self.y[n + 1][0][0] > 1 and 0.1 < self.y[n + 1][0][1] < 0.4:
+            if self.y[n + 1, 0, 0] > 1 and 0.1 < self.y[n + 1, 0, 1] < 0.4:
                 self.hit_detector = True
 
             # Break loop when electron exits grid space
-            if self.y[n + 1][0][0] < 0 or self.y[n + 1][0][0] > 1 or self.y[n + 1][0][1] < 0 or self.y[n + 1][0][1] > 1:
+            if self.y[n + 1, 0, 0] < 0 or self.y[n + 1, 0, 0] > 1 or self.y[n + 1, 0, 1] < 0 or self.y[n + 1, 0, 1] > 1:
                 break
 
         return self.y
+
+    def step(self, n):
+
+        if not self.out_of_domain and not self.hit_detector:
+            self.y[n+1] = self.step_func(self.t[n], self.y[n], self.h, self.df_dt)
+            self.t[n+1] = self.t[n] + self.h
+
+            if self.y[n + 1, 0, 0] > 1 and 0.1 < self.y[n + 1, 0, 1] < 0.4:
+                self.hit_detector = True
+
+            # Detect when electron exits space
+            if self.y[n + 1, 0, 0] < 0 or self.y[n + 1, 0, 0] > 1 or self.y[n + 1, 0, 1] < 0 or self.y[n + 1, 0, 1] > 1:
+                print(self.y[n + 1, 0, :], self.t[n + 1])
+                self.out_of_domain = True
+
+            if (n % 5 == 0):
+                self.plot_step(n)
+
+    def plot_step(self, n):
+        self.line.set_data(self.y[:n+1, 0, 0] * self.scale, self.y[:n+1, 0, 1] * self.scale)
+
+        if self.hit_detector:
+            self.axis_detector.scatter(self.y[n+1, 0, 1], self.t[n+1])
+
+    def init_plot(self, axis_main, axis_detector, scale):
+        self.axis_detector = axis_detector
+        self.scale = scale
+        self.line = axis_main.plot(self.y[0, 0, 1], self.t[-1])[0]
 
     def plot(self, axis_main, ax_top_right, scale):
         self.y = np.array(self.y)
