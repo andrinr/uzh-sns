@@ -36,9 +36,18 @@ class Electrons:
 
         bar.finish()
 
-    def plot(self, axis, axis_top_right, axis_bottom_right, scale):
+    def plot(self, axis, axis_top_right, scale):
+        count = 0
+
+        axis_top_right.set_xlabel('y-position')
+        axis_top_right.set_ylabel('age')
+
         for i in range(self.count):
             self.electrons[i].plot(axis, axis_top_right, scale)
+            if self.electrons[i].hit_detector:
+                count += 1
+
+        print(count/self.count*100, '% of all electrons have hit the detector.')
 
 # constant
 e_mc = 1.76 * 10 ** 11
