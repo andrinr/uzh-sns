@@ -11,8 +11,8 @@ class Advection:
         self.step_solver = step_solver
         self.u = u
         self.dx = 1 / N
-        self.h = self.dx / np.abs(u) * 0.5
-        self.c = self.u * self.h / self.dx
+        self.h = self.dx / np.abs(u)
+        self.c = self.u * self.h / self.dx * 0.5
 
     def step(self):
         if self.step_solver == 1:
@@ -69,9 +69,8 @@ ax_top.set_ylim(-0.3, 1.3)
 
 N = 1000
 rho = np.zeros(N)
-rho[int(N/4): int(2*N/4)] = 1
+rho[int(N/4): int(2*N/4)] = 0.4
 
-# Something has to be wrong with the formulas, therefore I use negative velocities here
 advections = [Advection(rho, 1, 1), Advection(rho, 2, 1), Advection(rho, 3, 1)]
 
 x = np.linspace(0, 1, N)
