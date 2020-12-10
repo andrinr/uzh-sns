@@ -11,7 +11,7 @@ vel_y = 10
 
 # Calculate delta t such that c_x + c_y = 1
 # add factor 0.5 for improved prevision => c_x + c_y = 0.5 < 1
-delta_t =  1 / (vel_x / delta_x + vel_y / delta_y)
+delta_t = 1 / (vel_x / delta_x + vel_y / delta_y)
 
 c_x = vel_x * delta_t / delta_x
 c_y = vel_y * delta_t / delta_y
@@ -34,6 +34,7 @@ kernel_ctu_pp = np.array([
 
 print(kernel_cir_pp)
 print(kernel_ctu_pp)
+
 
 def cir_step(grid):
     if vel_x > 0 < vel_y:
