@@ -24,7 +24,7 @@ def escape(x, y):
 
     C = complex(x, y)
     # initialize Z_0
-    Z = C
+    Z = 0
     iterations = 0
 
     # check if out of bounds or max number of iterations is reached

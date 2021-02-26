@@ -86,9 +86,9 @@ def forces(U):
     D_max_l = np.maximum(np.absolute(u_l) + c_l, np.absolute(u) + c)
     F_hl = 0.5 * (F + F_l) - 0.5 * D_max_l * (U - U_l)
     D_max_r = np.maximum(np.absolute(u_r) + c_r, np.absolute(u) + c)
-    F_hr = 0.5 * (F + F_r) - 0.5 * D_max_r * (U - U_r)
+    F_hr = 0.5 * (F + F_r) - 0.5 * D_max_r * (U_r - U)
 
-    # Dynamicly calculate t
+    # Dynamic t, global over array
     delta_t = 0.1 * delta_x/max(np.absolute(u) + c)
 
     return F_l, F_r, F_hl, F_hr, U_l, U_r, delta_t
@@ -104,11 +104,9 @@ class Hydro:
         # Calculate forces
         F_l, F_r, F_hl, F_hr, U_l, U_r, delta_t = forces(self.U)
 
-        print(delta_t)
-
         # LAX method
         if self.method == 'A':
-            self.U = 0.5 * (U_r + U_l) - delta_t / (2.*delta_x) * (F_r + F_l)
+            self.U = 0.5 * (U_r + U_l) - delta_t / (2.*delta_x) * (F_r - F_l)
 
         # Riemann solver
         if self.method == 'B':
@@ -168,7 +166,7 @@ for i in range(6):
 
 
 def update(i):
-    for substeps in range(1):
+    for substeps in range(20):
         for k in range(6):
             hydros[k].step()
             for j in range(3):
