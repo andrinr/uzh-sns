@@ -4,13 +4,6 @@ from matplotlib.animation import FuncAnimation
 import random as rd
 import math as math
 
-class Point:
-    
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-
 class Cell:
 
     def __init__(self, left, right, particles, boundA, boundB):
@@ -21,26 +14,35 @@ class Cell:
         self.particles = particles
 
     def partition(self, dimension):
-        guessX = (self.boundA.x + self.boundB.x)/2
-        guessY = (self.boundA.y + self.boundB.y)/2
-        halfCount = round((self.right - self.left) / 2)
+        # random initial guess
+        guess = (self.boundA[dimension] + self.boundB[dimension])/2
+        count = self.right - self.left
+        halfCount = round(count / 2)
 
-        for i in range(4, int(math.log2(self.right - self.left))**2, 1):
+        # binary search over float, 64bit
+        for i in range(4, 64, 1):
             count = 0
             for j in range(self.left, self.right):
-                # Not sure if branchless option indeed gives a speedup
-                count += (self.particles[j].x < guessX) * dimension 
-                count += (self.particles[j].y < guessY) * (1-dimension)
+                # branchless counting
+                count += (self.particles[j][dimension] < guess)
 
-            # branchless narrowing down guess
-            guessX += ((count < halfCount) - (count > halfCount)) * 1/i * dimension
-            guessY += ((count < halfCount) - (count > halfCount)) * 1/i * (1-dimension)
+            # guess improvement
+            guess += ((count < halfCount) - (count > halfCount)) * 1/i
 
-            if(abs(count - halfCount) < 1):
+            print(count, " ", guess)
+            # assuming power of two total particle count
+            # assuming unique particle positions
+            # probablity for not unqiue random float positions is ~0
+            if(abs(count - halfCount) == 0):
                 print(count)
                 break
 
-        for j in range(self.left, self.right):
+        while(j < halfCount):
+            if (particles[j][dimension] > guess):
+                tmp = particles[count-j-1]
+                particles[count-j-1] = particles[j]
+                particles[j] = tmp
+
 
 
         
@@ -51,9 +53,9 @@ particles = []
 num = 2 << 12
 print("total", num)
 for i in range(num):
-    particles.append(Point(rd.random(), rd.random()))
+    particles.append([rd.random(), rd.random()])
 
 
-root = Cell(0, num, particles, Point(0,0), Point(1,1))
+root = Cell(0, num, particles, [0,0], [1,1])
 
 root.partition(0)
