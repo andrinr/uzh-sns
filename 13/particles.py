@@ -6,56 +6,123 @@ import math as math
 
 class Cell:
 
-    def __init__(self, left, right, particles, boundA, boundB):
+    def __init__(self, parent, dimension, left, right, particles, boundA, boundB):
         self.left = left
         self.right = right
         self.boundA = boundA
         self.boundB = boundB
         self.particles = particles
+        self.parent = parent
+        self.dimension = dimension
+        self.isLeaf = False
+        self.splitPosition = 0
 
-    def partition(self, dimension):
+        if (self.right - self.left > 8):
+            self.partition()
+        else:
+            self.isLeaf = True
+
+    def partition(self):
         # random initial guess
-        guess = (self.boundA[dimension] + self.boundB[dimension])/2
+        guess = (self.boundA[self.dimension] + self.boundB[self.dimension])/2
         count = self.right - self.left
         halfCount = round(count / 2)
 
         # binary search over float, 64bit
         for i in range(4, 64, 1):
-            count = 0
+            nLeft = 0
             for j in range(self.left, self.right):
                 # branchless counting
-                count += (self.particles[j][dimension] < guess)
+                nLeft += (self.particles[j][self.dimension] < guess)
 
             # guess improvement
-            guess += ((count < halfCount) - (count > halfCount)) * 1/i
+            guess += ((nLeft < halfCount) - (nLeft > halfCount)) * 1/i
 
-            print(count, " ", guess)
             # assuming power of two total particle count
             # assuming unique particle positions
             # probablity for not unqiue random float positions is ~0
-            if(abs(count - halfCount) == 0):
-                print(count)
+            if(abs(nLeft - halfCount) == 0):
                 break
-
-        while(j < halfCount):
-            if (particles[j][dimension] > guess):
-                tmp = particles[count-j-1]
-                particles[count-j-1] = particles[j]
-                particles[j] = tmp
-
-
-
         
+        # single iteration of quicksort
+        i = 0
+        j = count - 1
+        while(i < halfCount and j >= halfCount):
+            if (self.particles[self.left + i][self.dimension] > guess):
+                tmp = self.particles[self.left + j]
+                self.particles[self.left + j] = self.particles[self.left + i]
+                self.particles[self.left + i] = tmp
+                j -= 1
+            else:
+                i += 1
 
+        self.splitPosition = guess
+
+        newBoundA = self.boundA.copy()
+        newBoundB = self.boundB.copy()
+        newBoundA[self.dimension] = self.splitPosition
+        newBoundB[self.dimension] = self.splitPosition
+        self.childA = Cell(self, 1-self.dimension, self.left, self.left + halfCount, self.particles, self.boundA, newBoundB)
+        self.childB = Cell(self, 1-self.dimension, self.left + halfCount, self.right, self.particles, newBoundA, self.boundB)
+
+    # Find leaf where position is located within
+    def findCell(self, position):
+        if not self.isLeaf:
+            if position[self.dimension] < self.splitPosition:
+                return self.childA.findCell(position)
+            else:
+                return self.childB.findCell(position)
+        else:
+            return self
+
+    # get all children
+    def getAllDescendants(self):
+        if not self.isLeaf:
+            arr = []
+            arr.extend(self.childA.getAllDescendants())
+            arr.extend(self.childB.getAllDescendants())
+            return arr
+        else:
+            return [self]
+
+    # Returns too many, but doesnt matter
+    def findNeighbouringParticles(self):
+        cells = self.parent.parent.parent.parent.getAllDescendants()
+
+        neighbouring_particles = []
+        for cell in cells:
+            neighbouring_particles.extend(self.particles[cell.left : cell.right])
+
+        return neighbouring_particles
+
+    # Search for k nearest particles all children
+    def kNearest(self, k, position):
+        cell = self.findCell(position)
+        neighbouringPaticles = cell.findNeighbouringParticles()
+    
+        def distance(elem):
+            x = elem[0] - position[0]
+            y = elem[1] - position[1]
+
+            return x * x + y * y
+        
+        neighbouringPaticles.sort(key = distance)
+
+        return neighbouringPaticles[1:k+1]
 
 
 particles = []
 num = 2 << 12
-print("total", num)
+print("Total number of particles: ", num)
 for i in range(num):
     particles.append([rd.random(), rd.random()])
 
+# Init and build tree
+print("Building tree...")
+root = Cell(False, 0, 0, num, particles, [0,0], [1,1])
+print("Tree built!")
 
-root = Cell(0, num, particles, [0,0], [1,1])
-
-root.partition(0)
+randomParticle = particles[rd.randint(0,num)]
+print(randomParticle)
+print("Searching for kNearest particles to: ", randomParticle)
+print(root.kNearest(8, randomParticle))
