@@ -1,6 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 import random as rd
 import math as math
 
@@ -85,7 +82,8 @@ class Cell:
         else:
             return [self]
 
-    # Returns too many, but doesnt matter
+    # Probably source of error in this code
+    # Probably does not return all particles of all neighbouringCells to this one
     def findNeighbouringParticles(self):
         cells = self.parent.parent.parent.parent.getAllDescendants()
 
@@ -99,7 +97,7 @@ class Cell:
     def kNearest(self, k, position):
         cell = self.findCell(position)
         neighbouringPaticles = cell.findNeighbouringParticles()
-    
+
         def distance(elem):
             x = elem[0] - position[0]
             y = elem[1] - position[1]
@@ -124,5 +122,21 @@ print("Tree built!")
 
 randomParticle = particles[rd.randint(0,num)]
 print(randomParticle)
-print("Searching for kNearest particles to: ", randomParticle)
-print(root.kNearest(8, randomParticle))
+print("Searching for kNearest particles using binary tree. Nearest particles to: ", randomParticle)
+k = 8
+nearestTree = root.kNearest(8, randomParticle)
+print("Tree solution: ", nearestTree)
+# n*n solution
+def distance(elem):
+    x = elem[0] - randomParticle[0]
+    y = elem[1] - randomParticle[1]
+
+    return x * x + y * y
+
+particlesSorted = sorted(particles, key = distance)
+
+print("n*n solution: ", particlesSorted[1:k+1])
+
+# The two methods only return the same result in around 80% of the cases
+# Im pretty sure the error comes from the way im determining the neigbouring cells
+# Sadly have no time to correct the error
