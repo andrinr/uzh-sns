@@ -133,3 +133,4 @@ print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
 print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
 print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
 print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
+    
