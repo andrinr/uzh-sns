@@ -1,6 +1,7 @@
 import random as rd
 import math as math
 
+# Binary tree
 class Cell:
 
     def __init__(self, parent, dimension, left, right, particles, boundA, boundB):
@@ -27,16 +28,18 @@ class Cell:
         halfCount = round(count / 2)
 
         # binary search over float, 64bit
-        for i in range(4, 64, 1):
+        # Starting at 4 because range is between 0 and 1
+        # Initial guess is at 0.5, thus next guess 
+        for i in range(2, 64, 1):
             nLeft = 0
             for j in range(self.left, self.right):
                 # branchless counting
                 nLeft += (self.particles[j][self.dimension] < guess)
 
             # guess improvement
-            guess += ((nLeft < halfCount) - (nLeft > halfCount)) * 1/i
+            guess += ((nLeft < halfCount) - (nLeft > halfCount)) * 1/(2<<i)
 
-            # assuming power of two total particle count
+            # assuming power of two total particle count, where power >= 3
             # assuming unique particle positions
             # probablity for not unqiue random float positions is ~0
             if(abs(nLeft - halfCount) == 0):
@@ -63,6 +66,7 @@ class Cell:
         self.childA = Cell(self, 1-self.dimension, self.left, self.left + halfCount, self.particles, self.boundA, newBoundB)
         self.childB = Cell(self, 1-self.dimension, self.left + halfCount, self.right, self.particles, newBoundA, self.boundB)
 
+
     # Find leaf where position is located within
     def findCell(self, position):
         if not self.isLeaf:
@@ -73,41 +77,8 @@ class Cell:
         else:
             return self
 
-    # get all children
-    def getAllDescendants(self):
-        if not self.isLeaf:
-            arr = []
-            arr.extend(self.childA.getAllDescendants())
-            arr.extend(self.childB.getAllDescendants())
-            return arr
-        else:
-            return [self]
+    #def ballWalk():
 
-    # Probably source of error in this code
-    # Probably does not return all particles of all neighbouringCells to this one
-    def findNeighbouringParticles(self):
-        cells = self.parent.parent.parent.parent.getAllDescendants()
-
-        neighbouring_particles = []
-        for cell in cells:
-            neighbouring_particles.extend(self.particles[cell.left : cell.right])
-
-        return neighbouring_particles
-
-    # Search for k nearest particles all children
-    def kNearest(self, k, position):
-        cell = self.findCell(position)
-        neighbouringPaticles = cell.findNeighbouringParticles()
-
-        def distance(elem):
-            x = elem[0] - position[0]
-            y = elem[1] - position[1]
-
-            return x * x + y * y
-        
-        neighbouringPaticles.sort(key = distance)
-
-        return neighbouringPaticles[1:k+1]
 
 
 particles = []
@@ -125,19 +96,6 @@ randomParticle = particles[rd.randint(0,num)]
 print(randomParticle)
 print("Searching for kNearest particles using binary tree. Nearest particles to: ", randomParticle)
 k = 8
-nearestTree = root.kNearest(k, randomParticle)
-print("Tree solution: ", nearestTree)
-# n*n solution
-def distance(elem):
-    x = elem[0] - randomParticle[0]
-    y = elem[1] - randomParticle[1]
+cell = root.findCell(randomParticle)
+print(cell.boundA, cell.boundB)
 
-    return x * x + y * y
-
-particlesSorted = sorted(particles, key = distance)
-
-print("n*n solution: ", particlesSorted[1:k+1])
-
-# The two methods only return the same result in around 80% of the cases
-# Im pretty sure the error comes from the way im determining the neigbouring cells
-# Sadly have no time to correct the error
