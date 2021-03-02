@@ -1,5 +1,7 @@
 import random as rd
 import math as math
+import time
+import matplotlib.pyplot as plt
 
 # Binary tree
 class Cell:
@@ -15,7 +17,7 @@ class Cell:
         self.isLeaf = False
         self.splitPosition = 0
 
-        if (self.right - self.left > 8):
+        if (self.right - self.left > 64):
             self.partition()
         else:
             self.isLeaf = True
@@ -89,6 +91,8 @@ class Cell:
         else:
             return self
 
+    # Distance function
+    # In this case using a circle, not a box
     def dist(self, a, b):
         x = abs(a[0] - b[0])
         y = abs(a[1] - b[1])
@@ -110,17 +114,16 @@ class Cell:
                 count += self.childB.ballWalk(position, r)
 
         return count
-            
-particles = []
-num = 2 << 15
-print("Total number of particles: ", num)
-for i in range(num):
-    particles.append([rd.random(), rd.random()])
 
-# Init and build tree
-print("Building tree...")
-root = Cell(False, 0, 0, num, particles, [0,0], [1,1])
-print("Tree built!")
+def buildTree(num):
+    particles = []
+    for i in range(num):
+        particles.append([rd.random(), rd.random()])
+
+    return Cell(False, 0, 0, num, particles, [0,0], [1,1])
+
+num = 2 << 15
+root = buildTree(num)
 
 print("Fun fact: the ballwalk algorithm can approximate PI:")
 d = 0.5
@@ -130,7 +133,19 @@ print("Checking weather periodic boundaries work, should also return a number ~ 
 # We pick a random center
 # without periodic boundaries this will return a wrong value when the random center is far from 0.5 0.5
 print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
-print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
-print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
-print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
-    
+
+# Scaling test
+scales = []
+times = []
+
+for i in range(9, 18):
+    num = 2 << i
+    scales.append(num)
+    root = buildTree(num)
+    start = time.time()
+    root.ballWalk([0, 0], 0.2)
+    end = time.time()
+    times.append(end - start)
+
+plt.plot(scales, times)
+plt.show()
