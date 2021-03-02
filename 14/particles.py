@@ -19,6 +19,10 @@ class Cell:
             self.partition()
         else:
             self.isLeaf = True
+            # Determine radius
+            self.radius = 0
+            for particle in self.particles[self.left : self.right]:
+                self.radius = max(self.radius, self.dist(self.center(), particle))
 
     # O(n*log(n))
     def partition(self):
@@ -66,6 +70,14 @@ class Cell:
         self.childA = Cell(self, 1-self.dimension, self.left, self.left + halfCount, self.particles, self.boundA, newBoundB)
         self.childB = Cell(self, 1-self.dimension, self.left + halfCount, self.right, self.particles, newBoundA, self.boundB)
 
+        center = self.center()
+        centerA = self.childA.center()
+        centerB = self.childB.center()
+        self.radius = max(self.dist(center, centerA) + self.childA.radius, self.dist(center, centerB) + self.childB.radius)
+
+    # Get center of cell, in this case center of square, not average of particles
+    def center(self):
+        return [(self.boundA[0] + self.boundB[0]) / 2, (self.boundA[1] + self.boundB[1]) / 2]
 
     # Find leaf where position is located within
     def findCell(self, position):
@@ -77,10 +89,28 @@ class Cell:
         else:
             return self
 
-    #def ballWalk():
+    def dist(self, a, b):
+        x = abs(a[0] - b[0])
+        y = abs(a[1] - b[1])
+        # Periodic boundaries
+        x = min(x, 1-x)
+        y = min(y, 1-y)
+        return math.sqrt(x * x + y * y)
 
+    def ballWalk(self, position, r):
+        count = 0
+        if (self.isLeaf):
+            for particle in self.particles[self.left : self.right]:
+                count += (self.dist(position, particle) < r)
+        else:
+            if (self.dist(position, self.childA.center()) < r + self.childA.radius):
+                count += self.childA.ballWalk(position, r)
 
+            if (self.dist(position, self.childB.center()) < r + self.childB.radius):
+                count += self.childB.ballWalk(position, r)
 
+        return count
+            
 particles = []
 num = 2 << 15
 print("Total number of particles: ", num)
@@ -92,10 +122,14 @@ print("Building tree...")
 root = Cell(False, 0, 0, num, particles, [0,0], [1,1])
 print("Tree built!")
 
-randomParticle = particles[rd.randint(0,num)]
-print(randomParticle)
-print("Searching for kNearest particles using binary tree. Nearest particles to: ", randomParticle)
-k = 8
-cell = root.findCell(randomParticle)
-print(cell.boundA, cell.boundB)
+print("Fun fact: the ballwalk algorithm can approximate PI:")
+d = 0.5
+print( (root.ballWalk([0.5, 0.5], d) / num) / (d/2))
 
+print("Checking weather periodic boundaries work, should also return a number ~ 3.1 ")
+# We pick a random center
+# without periodic boundaries this will return a wrong value when the random center is far from 0.5 0.5
+print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
+print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
+print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
+print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
