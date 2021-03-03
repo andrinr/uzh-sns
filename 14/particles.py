@@ -21,12 +21,12 @@ class Cell:
             self.partition()
         else:
             self.isLeaf = True
-            # Determine radius
+            # Determine radius, distance from center to particle furthest away
             self.radius = 0
             for particle in self.particles[self.left : self.right]:
                 self.radius = max(self.radius, self.dist(self.center(), particle))
 
-    # O(n*log(n))
+    # O(n*log(n)), when executed on root
     def partition(self):
         # random initial guess
         guess = (self.boundA[self.dimension] + self.boundB[self.dimension])/2
@@ -72,6 +72,7 @@ class Cell:
         self.childA = Cell(self, 1-self.dimension, self.left, self.left + halfCount, self.particles, self.boundA, newBoundB)
         self.childB = Cell(self, 1-self.dimension, self.left + halfCount, self.right, self.particles, newBoundA, self.boundB)
 
+        # Compute radius of non leaf cell
         center = self.center()
         centerA = self.childA.center()
         centerB = self.childB.center()
@@ -101,6 +102,7 @@ class Cell:
         y = min(y, 1-y)
         return math.sqrt(x * x + y * y)
 
+    # Ball walk
     def ballWalk(self, position, r):
         count = 0
         if (self.isLeaf):
@@ -134,6 +136,7 @@ print("Checking weather periodic boundaries work, should also return a number ~ 
 # without periodic boundaries this will return a wrong value when the random center is far from 0.5 0.5
 print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
 
+print("Testing performance...")
 # Scaling test
 scales = []
 times = []
@@ -148,4 +151,5 @@ for i in range(9, 18):
     times.append(end - start)
 
 plt.plot(scales, times)
+plt.title("Execution time over number of particles ")
 plt.show()
