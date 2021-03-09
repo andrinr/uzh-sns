@@ -1,4 +1,5 @@
 import random as rd
+import numpy as np
 import math as math
 import time
 import matplotlib.pyplot as plt
@@ -122,14 +123,16 @@ def buildTree(num):
     for i in range(num):
         particles.append([rd.random(), rd.random()])
 
-    return Cell(False, 0, 0, num, particles, [0,0], [1,1])
+    return Cell(False, 0, 0, num, particles, [0,0], [1,1]), particles
 
 num = 2 << 15
-root = buildTree(num)
+root, particles = buildTree(num)
 
 print("Fun fact: the ballwalk algorithm can approximate PI:")
 d = 0.5
 print( (root.ballWalk([0.5, 0.5], d) / num) / (d/2))
+
+plt.hist(np.array(particles)[:,0])
 
 print("Checking weather periodic boundaries work, should also return a number ~ 3.1 ")
 # We pick a random center
@@ -138,18 +141,19 @@ print( (root.ballWalk([rd.random(), rd.random()], d) / num) / (d/2))
 
 print("Testing performance...")
 # Scaling test
-scales = []
-times = []
+#scales = []
+#times = []
+#
+#for i in range(9, 18):
+#    num = 2 << i
+#    scales.append(num)
+#    root = buildTree(num)
+#    start = time.time()
+#    root.ballWalk([0, 0], 0.2)
+#    end = time.time()
+#    times.append(end - start)
+#
+#plt.plot(scales, times)
+#plt.title("Execution time over number of particles ")
 
-for i in range(9, 18):
-    num = 2 << i
-    scales.append(num)
-    root = buildTree(num)
-    start = time.time()
-    root.ballWalk([0, 0], 0.2)
-    end = time.time()
-    times.append(end - start)
-
-plt.plot(scales, times)
-plt.title("Execution time over number of particles ")
 plt.show()

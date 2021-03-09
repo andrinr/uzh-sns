@@ -1,4 +1,6 @@
 import random as rd
+import numpy as np
+from numpy.random import default_rng
 import math as math
 import time
 import matplotlib.pyplot as plt
@@ -19,14 +21,14 @@ class Cell:
         self.isLeaf = False
         self.splitPosition = 0
 
-        if (self.right - self.left > 64):
+        if (self.right - self.left > 8):
             self.partition()
         else:
             self.isLeaf = True
             # Determine radius, distance from center to particle furthest away
             self.radius = 0
             for particle in self.particles[self.left : self.right]:
-                self.radius = max(self.radius, self.dist(self.center(), particle))
+                self.radius = max(self.radius, self.dist(self.center(), particle[0:2]))
 
     # O(n*log(n)), when executed on root
     def partition(self):
@@ -42,10 +44,13 @@ class Cell:
             nLeft = 0
             for j in range(self.left, self.right):
                 # branchless counting
-                nLeft += (self.particles[j][self.dimension] < guess)
+                nLeft += (self.particles[j, self.dimension] < guess)
 
             # guess improvement
-            guess += ((nLeft < halfCount) - (nLeft > halfCount)) * 1/(2<<i)
+            if nLeft < halfCount:
+                guess += 1/(2<<i)
+            else:
+                guess -= 1/(2<<i)
 
             # assuming power of two total particle count, where power >= 3
             # assuming unique particle positions
@@ -57,7 +62,7 @@ class Cell:
         i = 0
         j = count - 1
         while(i < halfCount and j >= halfCount):
-            if (self.particles[self.left + i][self.dimension] > guess):
+            if (self.particles[self.left + i, self.dimension] > guess):
                 tmp = self.particles[self.left + j]
                 self.particles[self.left + j] = self.particles[self.left + i]
                 self.particles[self.left + i] = tmp
@@ -97,15 +102,14 @@ class Cell:
     def kNearest(self, position, queue):
         if self.isLeaf:
             for particle in self.particles:
-                d = self.dist(particle, position) + self.radius
-                if d < queue.getMax():
-                    print(".")
+                d = self.dist(particle, position)
+                if d + self.radius < queue.getMax():
                     queue.insert(d, particle)
 
         else:
-            # Max distances from position outermost particle from child cells
-            distA = self.dist(position, self.childA.center()) + self.radius
-            distB = self.dist(position, self.childB.center()) + self.radius
+            # Min distances from position to outermost particles from child cells
+            distA = self.dist(position, self.childA.center()) - self.radius
+            distB = self.dist(position, self.childB.center()) - self.radius
             if distA < distB:
                 if distA < queue.getMax():
                     self.childA.kNearest(position, queue)
@@ -117,19 +121,27 @@ class Cell:
                 if distA < queue.getMax():
                     self.childA.kNearest(position, queue)
 
-def buildTree(num):
-    particles = []
-    for i in range(num):
-        particles.append([rd.random(), rd.random(), rd.random()])
+num = 2 << 5
+print("Number of particles:", num)
 
-    return Cell(False, 0, 0, num, particles, [0,0], [1,1])
+rg = np.random.default_rng()
+particles = rg.random((num,3))
+root = Cell(False, 0, 0, num, particles, [0,0], [1,1])
+plt.hist(particles[:,0])
 
-num = 2 << 14
-root = buildTree(num)
+print(particles[:,0])
 
 queue = prioq(32)
-
 root.kNearest([0.5, 0.5], queue)
 
-print(queue.data)
+rMax = queue.getMax()
+sumMass = 0
+for particle in queue.data:
+    sumMass += particle[2]
 
+# Top hat density
+print("3D density: ", sumMass / (4/3 * math.pi * rMax ** 3))
+
+#plt.scatter(particles[:,0], particles[:,1])
+
+plt.show()
