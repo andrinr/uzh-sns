@@ -63,9 +63,9 @@ class Cell:
         j = count - 1
         while(i < halfCount and j >= halfCount):
             if (self.particles[self.left + i, self.dimension] > guess):
-                tmp = self.particles[self.left + j]
-                self.particles[self.left + j] = self.particles[self.left + i]
-                self.particles[self.left + i] = tmp
+                tmp = np.array(self.particles[self.left + j, :], copy=True)
+                self.particles[self.left + j, :] = self.particles[self.left + i, :]
+                self.particles[self.left + i, :] = tmp            
                 j -= 1
             else:
                 i += 1
@@ -121,15 +121,13 @@ class Cell:
                 if distA < queue.getMax():
                     self.childA.kNearest(position, queue)
 
-num = 2 << 5
+num = 2 << 13
 print("Number of particles:", num)
 
 rg = np.random.default_rng()
 particles = rg.random((num,3))
-root = Cell(False, 0, 0, num, particles, [0,0], [1,1])
 plt.hist(particles[:,0])
-
-print(particles[:,0])
+root = Cell(False, 0, 0, num, particles, [0,0], [1,1])
 
 queue = prioq(32)
 root.kNearest([0.5, 0.5], queue)
