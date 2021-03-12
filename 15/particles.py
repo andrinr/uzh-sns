@@ -4,7 +4,6 @@ from numpy.random import default_rng
 import math as math
 import time
 import matplotlib.pyplot as plt
-from prioq import prioq
 from heap import heap
 
 # Binary tree
@@ -46,10 +45,8 @@ class Cell:
                 nLeft += (self.particles[j, self.dimension] < guess)
                 #print(self.particles[j, self.dimension], self.particles[j, self.dimension] < guess, guess)
 
-            # assuming power of two total particle count, where power >= 3
-            # assuming unique particle positions
-            # probablity for not unqiue random float positions is ~0
-            if(abs(nLeft - halfCount) == 0):
+            # Break condtion for even and odd numbers of particles
+            if abs(nLeft - halfCount) == 0 or (count % 2 == 1 and abs(nLeft - halfCount) == 1):
                 break
 
             # guess improvement
@@ -135,7 +132,8 @@ class Cell:
                 if distA < queue.getMax():
                     self.childA.kNearest(position, queue)
 
-num = 1 << 9
+num = 1 << 11
+num = 1000
 print("Number of particles:", num)
 
 rg = np.random.default_rng()
