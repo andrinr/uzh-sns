@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 
 class prioq:
     def __init__(self, size):
@@ -13,9 +14,10 @@ class prioq:
     def getMax(self):
         return self.values[0]
 
-    def insert(self, value, data):
+    def replaceHead(self, value, data):
+        #print(data)
         self.values[0] = value
-        self.data[0] = data
+        self.data[0] = np.array(data, copy=True)
         self.order()
 
     def order(self):
@@ -27,8 +29,10 @@ class prioq:
                 index = i
 
         tmpValue = self.values[0]
-        tmpData = self.data[0]
+        tmpData = np.array(self.data[0], copy=True)
         self.values[0] = self.values[index]
         self.data[0] = self.data[index]
         self.values[index] = tmpValue
         self.data[index] = tmpData
+
+        #print(self.data[0], self.data[index])

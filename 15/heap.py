@@ -1,5 +1,7 @@
 import sys
+import numpy as np
 
+# max heap
 class heap:
     def __init__(self, size):
         self.data = []
@@ -15,26 +17,27 @@ class heap:
 
     def replaceHead(self, value, data):
         self.values[0] = value
-        self.data[0] = data
-        self.order()
+        self.data[0] = np.array(data, copy=True)
+        self.bubbleDown(0)
 
-    def order(self):
-        max = 0
-        index = -1
-        for i in range(self.size):  
-            if (self.values[i] > max):
-                max = self.values[i]
-                index = i
+    def bubbleDown(self, index):
+        leftIndex = index * 2 + 1
+        rightIndex = index * 2 + 2
 
-        tmpValue = self.values[0]
-        tmpData = self.data[0]
-        self.values[0] = self.values[index]
-        self.data[0] = self.data[index]
-        self.values[index] = tmpValue
-        self.data[index] = tmpData
+        if (leftIndex < self.size):
+            childIndex = leftIndex
+            if rightIndex < self.size and self.values[leftIndex] < self.values[rightIndex]:
+                childIndex = rightIndex
 
-class Node:
+            if (self.values[childIndex] > self.values[index]):
+                self.swap(index, childIndex)
+                self.bubbleDown(childIndex)
+                
 
-    def __init__(self, parent):
-        self.parent = parent
-    
+    def swap(self, a, b):
+        tmpValue = self.values[b]
+        tmpData = np.array(self.data[b], copy=True)
+        self.values[b] = self.values[a]
+        self.data[b] = self.data[a]
+        self.values[a] = tmpValue
+        self.data[a] = tmpData

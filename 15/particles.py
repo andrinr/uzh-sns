@@ -5,6 +5,7 @@ import math as math
 import time
 import matplotlib.pyplot as plt
 from prioq import prioq
+from heap import heap
 
 # Binary tree
 class Cell:
@@ -32,14 +33,13 @@ class Cell:
     # O(n*log(n)), when executed on root
     def partition(self):
         # random initial guess
-        guess = (self.boundA[self.dimension] + self.boundB[self.dimension])/2
+        guess = (self.boundB[self.dimension] + self.boundA[self.dimension]) / 2
+        step = guess - self.boundA[self.dimension] 
         count = self.right - self.left
         halfCount = round(count / 2)
 
-        # binary search over float, 64bit
-        # Starting at 4 because range is between 0 and 1
-        # Initial guess is at 0.5, thus next guess 
-        for i in range(2, 64, 1):
+        # binary search over float, 64bit, with start optimization
+        for i in range(math.floor(math.log2(1/step)) + 1, 64, 1):
             nLeft = 0
             for j in range(self.left, self.right):
                 # branchless counting
@@ -93,12 +93,16 @@ class Cell:
 
     def draw(self, ax):
         if self.isLeaf:
-            ax.scatter(self.particles[self.left: self.right, 0], self.particles[self.left: self.right, 1], s=1)
+            ax.scatter(self.particles[self.left: self.right, 0], self.particles[self.left: self.right, 1], s=2)
             ax.plot([self.boundA[0],self.boundB[0], self.boundB[0],self.boundA[0], self.boundA[0]],\
                  [self.boundA[1],self.boundA[1],self.boundB[1],self.boundB[1],self.boundA[1]], alpha = 0.8, linestyle="solid")
+
+            #for i in range(self.left, self.right):
+            #    ax.annotate(i, (self.particles[i,0], self.particles[i,1]))
         else:
             self.childA.draw(ax)
             self.childB.draw(ax)
+
     # Distance function
     # In this case using a circle, not a box
     def dist(self, a, b):
@@ -111,10 +115,10 @@ class Cell:
 
     def kNearest(self, position, queue):
         if self.isLeaf:
-            for particle in self.particles:
-                d = self.dist(particle, position)
-                if d + self.radius < queue.getMax():
-                    queue.insert(d, particle)
+            for i in range(self.left, self.right):
+                d = self.dist(self.particles[i,0:2], position)
+                if d < queue.getMax():
+                    queue.replaceHead(d, self.particles[i,0:2])
 
         else:
             # Min distances from position to outermost particles from child cells
@@ -131,24 +135,34 @@ class Cell:
                 if distA < queue.getMax():
                     self.childA.kNearest(position, queue)
 
-num = 1 << 12
+num = 1 << 9
 print("Number of particles:", num)
 
 rg = np.random.default_rng()
 particles = rg.random((num,3))
 #plt.hist(particles[:,0])
 root = Cell(0, 0, num, particles, [0,0], [1,1])
+fig, ax = plt.subplots()
+root.draw(ax)
 
-queue = prioq(32)
-root.kNearest([0.5, 0.5], queue)
+heap = heap(32)
+px = rd.random()
+py = rd.random()
+root.kNearest([px, py], heap)
 
-rMax = queue.getMax()
-sumMass = 0
-for particle in queue.data:
-    sumMass += particle[2]
+nearest = np.array(heap.data)
+
+ax.scatter(px, py, color="red", marker="x")
+ax.add_patch(plt.Circle((px,py), heap.getMax(), alpha=0.3, color="red"))
+ax.scatter(nearest[:,0], nearest[:,1], color="red", marker="v")
+
+rMax = heap.getMax()
+#sumMass = 0
+    #sumMass += particle[2]
+##for particle in queue.data:
 
 # Top hat density
-print("3D density: ", sumMass / (4/3 * math.pi * rMax ** 3))
-
-root.draw(plt)
+#print("3D density: ", sumMass / (4/3 * math.pi * rMax ** 3))
+plt.axis('scaled')
 plt.show()
+
