@@ -115,7 +115,7 @@ class Cell:
             for i in range(self.left, self.right):
                 d = self.dist(self.particles[i,0:2], position)
                 if d < queue.getMax():
-                    queue.replaceHead(d, self.particles[i,0:2])
+                    queue.replaceHead(d, self.particles[i,0:3])
 
         else:
             # Min distances from position to outermost particles from child cells
@@ -133,34 +133,29 @@ class Cell:
                     self.childA.kNearest(position, queue)
 
 num = 1 << 11
-num = 1000
 print("Number of particles:", num)
 
 rg = np.random.default_rng()
-particles = rg.random((num,3))
+particles = rg.random((num,4))
 #plt.hist(particles[:,0])
-root = Cell(0, 0, num, particles, [0,0], [1,1])
-fig, ax = plt.subplots()
-root.draw(ax)
+root = Cell(0, 0, num, particles[:,0:3], [0,0], [1,1])
+fig, axes = plt.subplots(1,2)
+root.draw(axes[0])
+axes[0].set_title("Tree")
 
-heap = heap(32)
-px = rd.random()
-py = rd.random()
-root.kNearest([px, py], heap)
+for particle in particles:
+    maxHeap = heap(32)
+    root.kNearest(particle[0:2], maxHeap)
 
-nearest = np.array(heap.data)
+    sumMass = 0
+    for np in maxHeap.data:
+        sumMass += np[2]
+    
+    particle[3] = sumMass / (4/3 * math.pi * maxHeap.getMax() ** 3)
 
-ax.scatter(px, py, color="red", marker="x")
-ax.add_patch(plt.Circle((px,py), heap.getMax(), alpha=0.3, color="red"))
-ax.scatter(nearest[:,0], nearest[:,1], color="red", marker="v")
-
-rMax = heap.getMax()
-#sumMass = 0
-    #sumMass += particle[2]
-##for particle in queue.data:
-
-# Top hat density
-#print("3D density: ", sumMass / (4/3 * math.pi * rMax ** 3))
-plt.axis('scaled')
+axes[1].set_title("Top hat density of 32 nearest")
+scatter = axes[1].scatter(particles[:,0], particles[:,1], c = particles[:,3])
+fig.colorbar(scatter, ax = axes[1])
+#fig.colorbar(particles[:,3])
 plt.show()
 
