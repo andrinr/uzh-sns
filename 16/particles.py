@@ -156,5 +156,6 @@ for particle in particles:
 axes[1].set_title("Top hat density of 32 nearest")
 scatter = axes[1].scatter(particles[:,0], particles[:,1], c = particles[:,3])
 fig.colorbar(scatter, ax = axes[1])
+#fig.colorbar(particles[:,3])
 plt.show()
 
