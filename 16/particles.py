@@ -132,30 +132,43 @@ class Cell:
                 if distA < queue.getMax():
                     self.childA.kNearest(position, queue)
 
-num = 1 << 11
+num = 1 << 13
 print("Number of particles:", num)
 
 rg = np.random.default_rng()
-particles = rg.random((num,4))
+particles = rg.random((num,5))
 #plt.hist(particles[:,0])
 root = Cell(0, 0, num, particles[:,0:3], [0,0], [1,1])
 fig, axes = plt.subplots(1,2)
-root.draw(axes[0])
-axes[0].set_title("Tree")
 
 for particle in particles:
     maxHeap = heap(32)
     root.kNearest(particle[0:2], maxHeap)
 
+    # Monohan factor
+    factor = (40 / (7*math.pi)) / (maxHeap.getMax() ** 2)
+
     sumMass = 0
-    for np in maxHeap.data:
-        sumMass += np[2]
+    sumMassMonohan = 0
+    for i in range(maxHeap.size):
+        mass = maxHeap.data[i][2]
+        sumMass += mass
+        h = maxHeap.getMax()
+        r = maxHeap.values[i]
+        if r > 0 and r / h < 0.5:
+            sumMassMonohan += mass * (6 * (r / h) ** 3 - 6 * (r / h) ** 2 + 1)
+        elif r > 0 and r / h <= 1:
+            sumMassMonohan += mass * (2 * (1-(r / h) ) ** 3)
+        
     
-    particle[3] = sumMass / (4/3 * math.pi * maxHeap.getMax() ** 3)
+    # Top hat
+    particle[3] = sumMass / (4/3 * math.pi * maxHeap.getMax() ** 2)
+    
+    particle[4] = sumMassMonohan
 
 axes[1].set_title("Top hat density of 32 nearest")
 scatter = axes[1].scatter(particles[:,0], particles[:,1], c = particles[:,3])
+scatter = axes[0].scatter(particles[:,0], particles[:,1], c = particles[:,4])
 fig.colorbar(scatter, ax = axes[1])
-#fig.colorbar(particles[:,3])
 plt.show()
 

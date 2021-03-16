@@ -136,7 +136,7 @@ num = 1 << 11
 print("Number of particles:", num)
 
 rg = np.random.default_rng()
-particles = rg.random((num,4))
+particles = rg.random((num,5))
 #plt.hist(particles[:,0])
 root = Cell(0, 0, num, particles[:,0:3], [0,0], [1,1])
 fig, axes = plt.subplots(1,2)
@@ -151,7 +151,7 @@ for particle in particles:
     for np in maxHeap.data:
         sumMass += np[2]
     
-    particle[3] = sumMass / (4/3 * math.pi * maxHeap.getMax() ** 3)
+    particle[3] = sumMass / (4/3 * math.pi * maxHeap.getMax() ** 2)
 
 axes[1].set_title("Top hat density of 32 nearest")
 scatter = axes[1].scatter(particles[:,0], particles[:,1], c = particles[:,3])
