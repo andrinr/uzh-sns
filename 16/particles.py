@@ -14,7 +14,7 @@ class Cell:
         self.right = right
         self.boundA = boundA
         self.boundB = boundB
-        # posX, posY, mass
+        # posX, posY, mass  
         self.particles = particles
         self.dimension = dimension
         self.isLeaf = False
@@ -132,7 +132,7 @@ class Cell:
                 if distA < queue.getMax():
                     self.childA.kNearest(position, queue)
 
-num = 1 << 13
+num = 1 << 10
 print("Number of particles:", num)
 
 rg = np.random.default_rng()
