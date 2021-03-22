@@ -136,7 +136,9 @@ num = 1 << 10
 print("Number of particles:", num)
 
 rg = np.random.default_rng()
-particles = rg.random((num,5))
+particles = np.zeros((num, 5))
+particles[:,2] = np.ones(num)
+particles[:,0:2] = rg.random((num,2))
 #plt.hist(particles[:,0])
 root = Cell(0, 0, num, particles[:,0:3], [0,0], [1,1])
 fig, axes = plt.subplots(1,2)
@@ -157,12 +159,12 @@ for particle in particles:
         r = maxHeap.values[i]
         if r > 0 and r / h < 0.5:
             sumMassMonohan += mass * (6 * (r / h) ** 3 - 6 * (r / h) ** 2 + 1)
-        elif r > 0 and r / h <= 1:
+        elif r/h >= 0.5 and r / h <= 1:
             sumMassMonohan += mass * (2 * (1-(r / h) ) ** 3)
         
     
     # Top hat
-    particle[3] = sumMass / (4/3 * math.pi * maxHeap.getMax() ** 2)
+    particle[3] = sumMass / ( math.pi * maxHeap.getMax() ** 2)
     
     particle[4] = sumMassMonohan
 
