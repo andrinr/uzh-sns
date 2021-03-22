@@ -2,7 +2,7 @@ import sys
 import numpy as np
 
 # max heap
-class heap:
+class Heap:
     def __init__(self, size):
         self.data = []
         self.values = []
