@@ -1,7 +1,9 @@
 import sys
 import numpy as np
 
-# max heap
+# Generel purpose max heap
+# Each data intance has a coresponding value
+# For the sake of consistency, value could be replaced by lambda function
 class Heap:
     def __init__(self, size):
         self.data = []

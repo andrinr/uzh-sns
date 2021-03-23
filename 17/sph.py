@@ -42,16 +42,26 @@ def driftOne():
     # v_pred = v + a * dt
     tmps[:,0,2] = particles[:,0:2] + dt * tmps[:,2:4]
     # e_pred = e + e_dot * dt
-    tmps[4] = particles[]
+    tmps[:, 4] = particles[:, 5] + dt * tmps[:,5]
 
 def driftTwo():
-    return 0
+    # r += v * dt
+    particles[:,0:2] += particles[:,2:4] * dt
 
 def kick():
-    return 0
+    # v += a * dt
+    particles[:,2:4] += tmps[:,2:4] * dt
+    # e += e_dot * dt
+    particles[:,4] += tmps[:,5] * dt
 
 def calcForce():
-    return 0
+    # Build tree
+    root = Cell(0, 0, num, particles, [0,0], [1,1])
+    # All particles calculate p_a
+
+    # All particles caclulate c
+
+    # All particles calcaulte a, e_dot
 
 driftOne()
 calcForce()
