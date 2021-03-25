@@ -16,24 +16,16 @@ print("Number of particles:", num)
 rg = np.random.default_rng()
 
 # Initializing particles
-# Particle array: rx, ry, vx, vy, e, c, p, h
+# Particle array: rx 0, ry 1, vx 2, vy 3, e 4, c 5, p 6, P 7
 # = 8 Dimensions
 particles = np.zeros((num, 8))
 # Random positions
-positions = rg.random((num,2))
-
 particles[:,0:2] = rg.random((num,2))
-# Constant energy
-particles[:,4] = rg.ones((num,2))
-# Constant density
-particles[:,6] = rg.ones((num,2))
+# Constant masses
+particles[:,7] = rg.random((num,1))
 
-# Temp values, v_pred, a, e_pred, e_dot
+# Temp values, v_pred 0:1, a 2:3, e_pred 4, e_dot 5
 tmps = np.zeros((num, 6))
-
-root = Cell(0, 0, num, particles[:,0:3], [0,0], [1,1])
-fig, axes = plt.subplots(1,2)
-
 dt = 0.01
 
 def driftOne():
@@ -54,14 +46,40 @@ def kick():
     # e += e_dot * dt
     particles[:,4] += tmps[:,5] * dt
 
+def monohan():
+    
+
 def calcForce():
     # Build tree
     root = Cell(0, 0, num, particles, [0,0], [1,1])
-    # All particles calculate p_a
 
-    # All particles caclulate c
+    for k in range(num):
+        heap = Heap(32)
+        root.kNearest(particles[k, 0:2], heap)
 
-    # All particles calcaulte a, e_dot
+        # Calculate p_a
+        factor = (40 / (7*math.pi)) / (maxHeap.getMax() ** 2)
+        for i in range(maxHeap.size):
+
+            mass = maxHeap.data[i][7]
+            h = maxHeap.getMax()
+            r = maxHeap.values[i]
+            if r > 0 and r / h < 0.5:
+                sumMassMonohan += factor * mass * (6 * (r / h) ** 3 - 6 * (r / h) ** 2 + 1)
+            elif r/h >= 0.5 and r / h <= 1:
+                sumMassMonohan += factor * mass * (2 * (1-(r / h) ) ** 3)
+
+        particles[k, 6] = sumMassMonohan
+
+        # Caclulate c
+        gamma = 2
+        particles[k, 5] = math.sqrt(particles[k, 4] * gamma * (1 - gamma))
+        
+        # All particles calcaulte a, e_dot
+        factor = particles[k, 7] / (particles[k, 6] ** 2)
+        tmps[k, 5] = 0
+        for i in range(maxHeap.size):
+            tmps[k, 5] += maxHeap.data[i][7] * (particles[k, 6] - maxHeap[i][6]) * 
 
 driftOne()
 calcForce()
