@@ -16,9 +16,11 @@ print("Number of particles:", num)
 rg = np.random.default_rng()
 
 # Initializing particles
-# Particle array: rx 0, ry 1, vx 2, vy 3, e 4, c 5, p 6, P 7
+# Particle array: rx 0, ry 1, vx 2, vy 3, e 4, c 5, rho 6, P 7
 # = 8 Dimensions
-particles = np.zeros((num, 8))
+positions = np.random((n, 2))
+velocities = np.zeros((n, 2))
+
 # Random positions
 particles[:,0:2] = rg.random((num,2))
 # Constant masses

@@ -6,12 +6,12 @@ import numpy as np
 # For the sake of consistency, value could be replaced by lambda function
 class Heap:
     def __init__(self, size):
-        self.data = []
+        self.indices = []
         self.values = []
         self.size = size
 
         for i in range(self.size):
-            self.data.append(0)
+            self.indices.append(0)
             self.values.append(sys.float_info.max)
 
     # Get maximum value, in this case at index 0
@@ -19,9 +19,9 @@ class Heap:
         return self.values[0]
 
     # Replace head, meaning delete maximum value and place new value at proper place
-    def replaceHead(self, value, data):
+    def replaceHead(self, value, index):
         self.values[0] = value
-        self.data[0] = np.array(data, copy=True)
+        self.indicies[0] = index
         self.bubbleDown(0)
 
     # O(log n), make sure tree conditions are met
@@ -45,8 +45,8 @@ class Heap:
     # Swap helper function
     def swap(self, a, b):
         tmpValue = self.values[b]
-        tmpData = np.array(self.data[b], copy=True)
+        tmpIndex = self.indices[b]
         self.values[b] = self.values[a]
-        self.data[b] = self.data[a]
+        self.indices[b] = self.indices[a]
         self.values[a] = tmpValue
-        self.data[a] = tmpData
+        self.indices[a] = tmpIndex

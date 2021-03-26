@@ -110,7 +110,7 @@ class Cell:
             for i in range(self.left, self.right):
                 d = self.dist(self.particles[i,0:2], position)
                 if d < queue.getMax():
-                    queue.replaceHead(d, self.particles[i,:])
+                    queue.replaceHead(d, i)
 
         else:
             # Min distances from position to outermost particles from child cells
