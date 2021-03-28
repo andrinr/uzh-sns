@@ -15,39 +15,26 @@ print("Number of particles:", num)
 # Init random generator
 rg = np.random.default_rng()
 
-# Initializing particles
-pos = rg.random((num, 2))
-vel = np.zeros((num, 2))
-velPred = np.zeros((num, 2))
-acc = np.zeros((num, 2))
-e = np.zeros((num))
-e_pred = np.zeros((num))
-e_dot = np.zeros((num))
-rho = np.zeros((num))
-c = np.zeros((num))
-mass = np.ones((num))
-
-# Temp values, v_pred 0:1, a 2:3, e_pred 4, e_dot 5
-tmps = np.zeros((num, 6))
-dt = 0.01
-
 def driftOne():
+    global pos, velPred, e_pred
     # r += v * dt
-    pos = pos + vel * dt
+    pos += vel * dt
     # v_pred = v + a * dt
     velPred = vel + acc * dt
     # e_pred = e + e_dot * dt
     e_pred = e + e_dot * dt
 
 def driftTwo():
+    global pos
     # r += v * dt
-    pos = pos + vel * dt
+    pos += vel * dt
 
 def kick():
+    global vel, e
     # v += a * dt
-    vel = vel + acc * dt
+    vel += acc * dt
     # e += e_dot * dt
-    e =  e + e_dot * dt
+    e += e_dot * dt
 
 def monohan(r, h):
     if r > 0 and r / h < 0.5:
@@ -65,8 +52,9 @@ def calcForce():
 
         # Calculate p_a
         factor = (40 / (7*math.pi)) / (heap.getMax() ** 2)
+        sumMassMonohan = 0
         for i in range(heap.size):
-            b = heap.indices[b]
+            b = heap.indices[i]
             massCurrent = mass[b]
             h = heap.getMax()
             r = heap.values[i]
@@ -96,5 +84,19 @@ def update(time):
     calcForce()
     kick()
     driftTwo()
+
+
+# Initializing particles
+pos = rg.random((num, 2))
+vel = np.zeros((num, 2))
+velPred = np.zeros((num, 2))
+acc = np.zeros((num, 2))
+e = np.zeros((num))
+e_pred = np.zeros((num))
+e_dot = np.zeros((num))
+rho = np.zeros((num))
+c = np.zeros((num))
+mass = np.ones((num))
+dt = 0.01
 
 update(10)

@@ -21,7 +21,7 @@ class Heap:
     # Replace head, meaning delete maximum value and place new value at proper place
     def replaceHead(self, value, index):
         self.values[0] = value
-        self.indicies[0] = index
+        self.indices[0] = index
         self.bubbleDown(0)
 
     # O(log n), make sure tree conditions are met
