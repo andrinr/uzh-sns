@@ -9,11 +9,25 @@ import matplotlib.pyplot as plt
 from heap import Heap
 from cell import Cell
 
+# Parameters
 num = 1 << 10
+dt = 0.01
 print("Number of particles:", num)
 
 # Init random generator
 rg = np.random.default_rng()
+
+# Initializing particles
+pos = rg.random((num, 2))
+vel = np.zeros((num, 2))
+velPred = np.zeros((num, 2))
+acc = np.zeros((num, 2))
+e = np.zeros((num, 2))
+e_pred = np.zeros((num, 2))
+e_dot = np.zeros((num, 2))
+rho = np.zeros((num))
+c = np.zeros((num))
+mass = np.ones((num))
 
 def driftOne():
     global pos, velPred, e_pred
@@ -37,7 +51,7 @@ def kick():
     e += e_dot * dt
 
 def monohan(r, h):
-    if r > 0 and r / h < 0.5:
+    if r == 0 or (r > 0 and r / h < 0.5):
         return (6 * (r / h) ** 3 - 6 * (r / h) ** 2 + 1)
     elif r/h >= 0.5 and r / h <= 1:
         return (2 * (1-(r / h) ) ** 3)
@@ -58,7 +72,6 @@ def calcForce():
             massCurrent = mass[b]
             h = heap.getMax()
             r = heap.values[i]
-
             sumMassMonohan += factor * massCurrent * monohan(r, h)
             
         rho[a] = sumMassMonohan
@@ -66,18 +79,21 @@ def calcForce():
         # Caclulate c
         gamma = 2
         c[a] = math.sqrt( e[a] * gamma* (1 - gamma))
-            
+    
+    # Second loop is required since all c's have to be calculated
+    for a in range(num):
         # Calculate e_dot
-        factor[a] = c / (2 * rho[a])
         e_dot[a] = 0
+        f_a = c[a] ** 2 / (2. * rho[a])
 
         for i in range(heap.size):
-            b = heap.indices[b]
+            b = heap.indices[i]
+            f_b = c[b] ** 2 / (2. * rho[b])
             h = heap.getMax()
             r = heap.values[i]
-            e_dot[a] += mass[b] * (vel[a] - vel[b]) * monohan(r, h)
-            # Fix this: factor[b] will not be calculated before this
-            acc[a] -= mass[b] * (factor[a] * factor[b]) * monohan(r, h)
+            print(f_a, f_b)
+            e_dot[a] += f_a * mass[b] * (vel[a] - vel[b]) * monohan(r, h)
+            acc[a] -= mass[b] * (f_a + f_b) * monohan(r, h)
 
 def update(time):
     driftOne()
@@ -85,18 +101,5 @@ def update(time):
     kick()
     driftTwo()
 
-
-# Initializing particles
-pos = rg.random((num, 2))
-vel = np.zeros((num, 2))
-velPred = np.zeros((num, 2))
-acc = np.zeros((num, 2))
-e = np.zeros((num))
-e_pred = np.zeros((num))
-e_dot = np.zeros((num))
-rho = np.zeros((num))
-c = np.zeros((num))
-mass = np.ones((num))
-dt = 0.01
 
 update(10)
