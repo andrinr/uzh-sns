@@ -56,9 +56,23 @@ def monohan(r, h):
     elif r/h >= 0.5 and r / h <= 1:
         return (2 * (1-(r / h) ) ** 3)
 
+def dMonohan(r, h):
+    if r == 0 or (r > 0 and r / h < 0.5):
+        return (3 * (r / h) ** 2 - 2 * (r / h))
+    elif r/h >= 0.5 and r / h <= 1:
+        return ((1-(r / h) ) ** 2)
+    return 0
+
+def gradMonohan(ra, rb, h):
+    rab = ra - rb
+    absRab = math.sqrt(rab.dot(rab))
+    dWdr = dMonohan(absRab, h)
+    grad = dWdr * rab / absRab
+    return grad
+
 def calcForce():
     # Build tree
-    root = Cell(0, 0, num, pos, [0,0], [1,1])
+    root = Cell(0, 0, num, pos, [0,0], [1,1])   
 
     for a in range(num):
         heap = Heap(32)
@@ -73,7 +87,7 @@ def calcForce():
             h = heap.getMax()
             r = heap.values[i]
             sumMassMonohan += factor * massCurrent * monohan(r, h)
-            
+
         rho[a] = sumMassMonohan
 
         # Caclulate c
@@ -100,6 +114,5 @@ def update(time):
     calcForce()
     kick()
     driftTwo()
-
 
 update(10)
