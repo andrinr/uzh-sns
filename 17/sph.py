@@ -22,9 +22,9 @@ pos = rg.random((num, 2))
 vel = np.zeros((num, 2))
 velPred = np.zeros((num, 2))
 acc = np.zeros((num, 2))
-e = np.zeros((num, 2))
-e_pred = np.zeros((num, 2))
-e_dot = np.zeros((num, 2))
+e = np.zeros((num))
+e_pred = np.zeros((num))
+e_dot = np.zeros((num))
 rho = np.zeros((num))
 c = np.zeros((num))
 mass = np.ones((num))
@@ -81,10 +81,11 @@ def calcForce():
         # Calculate p_a
         factor = (40 / (7*math.pi)) / (heap.getMax() ** 2)
         sumMassMonohan = 0
+        h = heap.getMax()
+
         for i in range(heap.size):
             b = heap.indices[i]
             massCurrent = mass[b]
-            h = heap.getMax()
             r = heap.values[i]
             sumMassMonohan += factor * massCurrent * monohan(r, h)
 
@@ -100,14 +101,17 @@ def calcForce():
         e_dot[a] = 0
         f_a = c[a] ** 2 / (2. * rho[a])
 
+        h = heap.getMax()
+        pos_a = pos[a]
+
         for i in range(heap.size):
             b = heap.indices[i]
-            f_b = c[b] ** 2 / (2. * rho[b])
-            h = heap.getMax()
-            r = heap.values[i]
-            print(f_a, f_b)
-            e_dot[a] += f_a * mass[b] * (vel[a] - vel[b]) * monohan(r, h)
-            acc[a] -= mass[b] * (f_a + f_b) * monohan(r, h)
+            if a != b:
+                f_b = c[b] ** 2 / (2. * rho[b])
+                pos_b = pos[b]
+
+                e_dot[a] += f_a * mass[b] * (vel[a] - vel[b]).dot(gradMonohan(pos_a, pos_b, h))
+                acc[a] -= mass[b] * (f_a + f_b) * gradMonohan(pos_a, pos_b, h)
 
 def update(time):
     driftOne()
