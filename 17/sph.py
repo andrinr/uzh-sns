@@ -22,7 +22,8 @@ class SPH:
         self.vel = np.zeros((num, 2))
         self.velPred = np.zeros((num, 2))
         self.acc = np.zeros((num, 2))
-        self.e = np.full((num), 0.1)
+        self.e = np.zeros((num))
+        self.e[0] = 100.0
         self.e_pred = np.zeros((num))
         self.e_dot = np.zeros((num))
         self.rho = np.zeros((num))
@@ -107,11 +108,13 @@ class SPH:
                     f_b = self.c[b] ** 2 / (2. * self.rho[b])
                     pos_b = self.pos[b]
 
-                    self.e_dot[a] += f_a * self.mass[b] * (self.vel[a] - self.vel[b]).dot(self.gradMonohan(pos_a, pos_b, h))
+                    self.e_dot[a] += self.mass[b] * (self.vel[a] - self.vel[b]).dot(self.gradMonohan(pos_a, pos_b, h))
                     self.acc[a] -= self.mass[b] * (f_a + f_b) * self.gradMonohan(pos_a, pos_b, h)
+            
+            self.e_dot[a] *= f_a
 
     def update(self):
-        print(self.pos[0], self.vel[0], self.acc[0], self.e[0], self.e_dot[0], self.rho[0], self.mass[0], self.c[0])
+        #print(self.pos[0], self.vel[0], self.acc[0], self.e[0], self.e_dot[0], self.rho[0], self.mass[0], self.c[0])
         self.driftOne()
         self.calcForce()
         self.kick()
