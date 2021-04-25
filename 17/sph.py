@@ -22,8 +22,8 @@ class SPH:
         self.vel = np.zeros((num, 2))
         self.velPred = np.zeros((num, 2))
         self.acc = np.zeros((num, 2))
-        self.e = np.zeros((num))
-        self.e[0] = 100.0
+        self.e = rg.random((num))
+        #self.e[0] = 100.0
         self.e_pred = np.zeros((num))
         self.e_dot = np.zeros((num))
         self.rho = np.zeros((num))
