@@ -77,28 +77,40 @@ class tour:
         pathCopy[ind[0]:ind[1]] = np.flip(pathCopy[ind[0]:ind[1]])
         return self.calcE(pathCopy), pathCopy
 
+    def tryCut(self):
+        ind = self.rg.integers(0, high=self.N, size=3)
+        pathCopyA = np.copy(self.path)
+        pathCopyB = np.copy(self.path)
+        np.roll(pathCopyA, )
+        
 
-nNodes = 300
+nNodes = 150
 tour = tour(nNodes)
 fig = plt.figure(constrained_layout=True)
 gs = fig.add_gridspec(1, 2)
 axLeft = fig.add_subplot(gs[:,0])
 axRight = fig.add_subplot(gs[:,1])
 
-tourPlot, = axLeft.plot(tour.nodes[tour.getMap(),0], tour.nodes[tour.getMap(),1])
-tmpPlot, = axRight.plot([],[])
+pathPlot, = axLeft.plot(tour.nodes[tour.getMap(),0], tour.nodes[tour.getMap(),1])
+nodePlot = axLeft.scatter(tour.nodes[tour.getMap(),0], tour.nodes[tour.getMap(),1], c="black")
+ePlot, = axRight.plot([],[])
+tPlot, = axRight.plot([],[])
 axRight.set_xlim(0,1)
 axRight.set_ylim(0,nNodes*0.6)
 nFrames = 400
 times = []
 energy = []
+temps = []
 def update(time):
     global tour
     tour.step()
     times.append(time/nFrames)
     energy.append(tour.calcE(tour.path))
-    tourPlot.set_data(tour.nodes[tour.getMap(),0], tour.nodes[tour.getMap(),1])
-    tmpPlot.set_data(times, energy)
+    temps.append(tour.T)
+    pathPlot.set_data(tour.nodes[tour.getMap(),0], tour.nodes[tour.getMap(),1])
+    nodePlot.set_offsets(tour.nodes[tour.getMap(),:])
+    ePlot.set_data(times, energy)
+    tPlot.set_data(times, temps)
 
 
 animation = FuncAnimation(fig, update, frames=range(nFrames), interval=10, repeat=False)
