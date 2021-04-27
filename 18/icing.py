@@ -81,7 +81,7 @@ fig, axs = plt.subplots(1)
 im = axs.imshow(spin)
 
 # plotting
-animation = FuncAnimation(fig, updateFast, frames=range(500), interval=10, repeat=False)
+#animation = FuncAnimation(fig, updateFast, frames=range(1), interval=10, repeat=False)
 
 
 plt.show()
